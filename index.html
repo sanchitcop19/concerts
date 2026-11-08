@@ -229,7 +229,7 @@ a.date:hover .d{color:var(--accent-ink)}
 .badge.up{background:var(--accent);color:#fff}
 .more{display:block;margin:20px auto 0;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 20px;font:600 14px Inter,sans-serif;cursor:pointer}
 .more:hover{border-color:var(--accent)}
-@media (max-width:600px){.chips{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr))}.chip{min-width:0;padding:12px 14px}.bar .wrap{flex-wrap:wrap}.years{flex-basis:100%;order:2}.search{flex:1 1 100%}.show{grid-template-columns:48px minmax(0,1fr) auto}.badge-wrap .badge{display:none}.cols{height:180px}.col .v{font-size:10px}.col .x{font-size:10px}}
+@media (max-width:600px){.chips{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr))}.chips[style*="--n: 2"] .chip:last-child:nth-child(odd){grid-column:1/-1}.chip{min-width:0;padding:12px 14px}.bar .wrap{flex-wrap:wrap}.years{flex-basis:100%;order:2}.search{flex:1 1 100%}.show{grid-template-columns:48px minmax(0,1fr) auto}.badge-wrap .badge{display:none}.cols{height:180px}.col .v{font-size:10px}.col .x{font-size:10px}}
 
 /* Tooltip */
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.35;max-width:240px;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
@@ -377,14 +377,14 @@ function normalize(rows,cols){
     const date=parseDate(r[cols.date]);
     let city=(r[cols.city]||"").trim();
     let state=(r[cols.state]||"").trim(), country=(r[cols.country]||"").trim();
-    if(!city&&cols.location){const p=(r[cols.location]||"").split(",").map(x=>x.trim());city=p[0]||"";state=state||p[1]||"";}
+    if(!city&&cols.location){const p=(r[cols.location]||"").split(",").map(x=>x.trim());city=p[0]||"";state=state||p[1]||"";country=country||(p.length>=3?p.at(-1):p.length===2?p[1]:"");}
     const bands=splitBands(r[cols.bands]);
     const title=(r[cols.title]||"").trim();
     let status=(r[cols.status]||"").trim().toLowerCase();
     if(!status) status=date&&date.key>TODAY?"upcoming":"past";
     const url=(r[cols.url]||"").trim();
     return {date,status,bands:bands.length?bands:(title?[title]:[]),title,venue:(r[cols.venue]||"").trim(),
-      city,place:[city,state||country].filter(Boolean).join(", "),url:/^https:\/\//.test(url)?url:""};
+      city,country,place:[city,state||country].filter(Boolean).join(", "),url:/^https:\/\//.test(url)?url:""};
   }).filter(c=>c.date||c.bands.length);
 }
 
@@ -597,10 +597,9 @@ function renderDash(){
   $("heroNum").textContent=list.length;
   $("heroSub").textContent=YEAR?(list.length===1?"show this year":"shows this year"):(list.length===1?"show and counting":"shows and counting");
   $("heroRange").textContent=dated.length?`${fmtDate(dated[0].date)} — ${fmtDate(dated.at(-1).date)}`:"";
-  const repeat=[...artists.values()].filter(v=>v>1).length;
   $("chips").style.setProperty("--n",2);
-  $("chips").innerHTML=[[artists.size,"artists"],[venues.size,"venues"],[cities.size,"cities"],[repeat,"seen 2+ times"]]
-    .map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  $("chips").innerHTML=heroStats(list,went,artists,venues,cities)
+    .map(([v,l,tip])=>`<div class="chip" data-tip="${esc(tip)}"><b class="num">${v}</b><span>${l}</span></div>`).join("");
   renderTickets(ALL);
 
   // Year pills
@@ -622,6 +621,37 @@ function renderDash(){
   rank($("topVenues"),venues,"venue");
   renderDonut($("cityDonut"),cities,list.length,"city");
   renderList(ALL.filter(c=>inYear(c)&&inQuery(c)),list.length,Q?"Matching shows":YEAR?`Every show in ${YEAR}`:"Every show");
+}
+
+// Hero stat cards: [value, label, hover explanation]
+function heroStats(list,went,artists,venues,cities){
+  const countries=new Set(list.map(c=>c.country).filter(Boolean));
+  const repeat=[...artists.values()].filter(v=>v>1).length;
+  const out=[
+    [artists.size,"artists","Different acts you've seen"],
+    [venues.size,"venues","Different venues"],
+    [cities.size,"cities","Different cities"],
+  ];
+  if(countries.size>1) out.push([countries.size,"countries",[...countries].join(", ")]);
+  if(YEAR){
+    // Artists you saw for the very first time that year
+    const before=new Set(went.filter(c=>c.date&&c.date.y<+YEAR).flatMap(c=>c.bands));
+    const fresh=new Set(list.flatMap(c=>c.bands).filter(b=>!before.has(b)));
+    out.push([fresh.size,"new artists",`Acts you saw for the first time in ${YEAR}`]);
+  }else{
+    const months=new Set(list.filter(c=>c.date).map(c=>c.date.y*12+c.date.m));
+    const now=new Date(), thisM=now.getFullYear()*12+now.getMonth();
+    let m=months.has(thisM)?thisM:thisM-1, streak=0;
+    while(months.has(m)){streak++;m--}
+    let best=0,run=0,prev=null;
+    for(const k of [...months].sort((a,b)=>a-b)){run=prev!==null&&k-prev===1?run+1:1;best=Math.max(best,run);prev=k}
+    if(streak>1) out.push([streak,"month streak",streak===best?"Months in a row with at least one show: your longest ever":`Months in a row with at least one show (best: ${best})`]);
+    const yearAgo=Date.UTC(now.getFullYear()-1,now.getMonth(),now.getDate());
+    const recent=list.filter(c=>c.date&&c.date.t>yearAgo).length;
+    if(recent) out.push([(recent/12).toFixed(1),"shows / month",`${recent} shows in the last 12 months`]);
+  }
+  out.push([repeat,"seen 2+ times","Acts you've seen more than once"]);
+  return out;
 }
 
 function renderFacts(list,dated){
