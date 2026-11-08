@@ -1,11 +1,11 @@
-# Every morning: read the Concert Archives Google Calendar, merge new shows into
+# Every 10 minutes: read the Concert Archives Google Calendar, merge new shows into
 # data/concerts.csv, commit, and redeploy the site.
 # Needs one repo secret: CALENDAR_ICS_URL = the calendar's "Secret address in iCal format".
 name: Sync from calendar
 
 on:
   schedule:
-    - cron: "17 13 * * *"   # 13:17 UTC = 5:17am Pacific (6:17am during PST)
+    - cron: "*/10 * * * *"   # every 10 min; GitHub can delay scheduled runs a few minutes when busy
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,7 @@ jobs:
             exit 0
           fi
           python3 scripts/sync_calendar.py
+          # Status flips (Upcoming -> Past) happen once a day at most; real changes come from the calendar.
           if git diff --quiet data/concerts.csv; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
