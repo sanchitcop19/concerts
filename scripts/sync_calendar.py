@@ -6,13 +6,15 @@ Concert Archives adds every show to that calendar as an event like:
     LOCATION: The Showbox, Seattle, Washington, United States
     DESCRIPTION: View on Concert Archives: https://www.concertarchives.org/sanchitcop19/concerts/...
 
-We read the calendar's private iCal link (env CALENDAR_ICS_URL, kept as a GitHub secret),
+We read Concert Archives' calendar feed (env CALENDAR_ICS_URL, kept as a GitHub secret),
 then MERGE into the existing CSV, keyed by the Concert Archives URL:
-  * new shows are added,
-  * existing shows get their date / bands / venue / location refreshed,
-  * nothing is ever deleted (the export may hold details the calendar doesn't, e.g. tour names).
-Status is Upcoming for dates from today on and Past before that; Cancelled / Rescheduled set by an
-export are kept.
+  * new shows are added (bands come from the event title, the only place the feed has them),
+  * existing shows get their date / venue / location / status refreshed, but NEVER their bands:
+    the event title mixes in "bands not seen" and uses the event name for festivals
+    (e.g. "NAMM"), so the export's "Bands Seen" is the better list,
+  * a CANCELLED event marks the show Cancelled (the feed also uses this for rescheduled shows,
+    so an existing Rescheduled status is kept),
+  * nothing is ever deleted.
 
 Usage:  CALENDAR_ICS_URL=... python3 scripts/sync_calendar.py [--ics local.ics] [--dry-run]
 Standard library only.
@@ -71,9 +73,7 @@ def to_row(ev):
     """Turn one calendar event into a CSV row (or None if it isn't a show)."""
     if "date" not in ev or not ev.get("summary"):
         return None
-    if ev.get("status", "").upper() == "CANCELLED":
-        return None
-    m = CA_URL.search(ev.get("description", "") + " " + ev.get("url", ""))
+    m = CA_URL.search(ev.get("url", "") + " " + ev.get("description", ""))
     if not m:
         return None  # not a Concert Archives event
     summary = ev["summary"]
@@ -83,7 +83,8 @@ def to_row(ev):
         location = location[len(venue) + 1:].strip()
     return {
         "Start Date": ev["date"].strftime("%m/%d/%Y"),
-        "Status": "Upcoming" if ev["date"] >= datetime.now(HOME_TZ).date() else "Past",
+        "Status": "Cancelled" if ev.get("status", "").upper() == "CANCELLED"
+                  else "Upcoming" if ev["date"] >= datetime.now(HOME_TZ).date() else "Past",
         "Bands Seen": bands.strip(),
         "Venue": venue.strip(),
         "Location": location,
@@ -103,6 +104,8 @@ def merge(existing, cal_rows):
     added = updated = 0
     for c in cal_rows:
         row = by_url.get(c["URL"])
+        if row is None and c["Status"] == "Cancelled":
+            continue  # never add a show that's already cancelled
         if row is None:
             row = {h: "" for h in HEADERS}
             row.update(c)
@@ -111,7 +114,7 @@ def merge(existing, cal_rows):
             added += 1
             continue
         before = dict(row)
-        for k in ("Start Date", "Bands Seen", "Venue", "Location"):
+        for k in ("Start Date", "Venue", "Location"):
             if c[k]:
                 row[k] = c[k]
         if row.get("Status", "").lower() not in ("cancelled", "rescheduled"):
