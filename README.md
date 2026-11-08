@@ -22,6 +22,37 @@ On GitHub, open `data/`, click **Add file → Upload files**, drop in the export
 ### Option B: automatic (Gmail → GitHub)
 `automation/gmail-to-github.gs` is a Google Apps Script that checks your Gmail every hour for the Concert Archives export email and commits the attachment for you. Setup steps are at the top of the file. After that, the only manual step is clicking **Export to Spreadsheet** after you log new shows.
 
+### Option C: the robot (fully automatic, runs on your Mac)
+`robot/scrape.mjs` opens your Concert Archives profile in **your own Google Chrome**, reads every show, saves `data/concerts.csv` in the same columns as the official export, and pushes it. It runs on your computer rather than in the cloud because Concert Archives blocks cloud servers.
+
+One-time setup (needs [Node.js](https://nodejs.org) and Google Chrome):
+```sh
+git clone https://github.com/sanchitcop19/concerts.git && cd concerts
+bash robot/install-mac.sh             # installs and schedules a daily run at 7:23pm
+node robot/scrape.mjs --headed        # first run: watch it work and click Cloudflare's checkbox if asked
+```
+- Log: `~/Library/Logs/concert-robot.log`
+- Run it now: `launchctl kickstart gui/$(id -u)/com.concerts.robot`
+- Uninstall: `bash robot/install-mac.sh remove`
+- If it says "Found no shows", it saved `robot/debug.html`. Share that file so the parser can be adjusted.
+- Safety net: it won't overwrite the CSV if it suddenly finds 20%+ fewer shows (e.g. a half-loaded page).
+- Limitation: it can't see whether a show was cancelled, so cancelled shows count as attended. The manual export doesn't have this problem.
+
+## iPhone app
+Two ways to get it on your phone:
+
+**Quick: Add to Home Screen.** Open the site in Safari, tap Share, then **Add to Home Screen**. It gets the app icon and opens full-screen.
+
+**Real app (Xcode).** `ios/` holds a small SwiftUI app that shows the live dashboard. Data and design updates appear without a new build. It has pull-to-refresh and swipe-back, opens Concert Archives links in Safari, and falls back to the last copy it loaded when you're offline.
+```sh
+brew install xcodegen          # one time
+cd ios && xcodegen             # creates Concerts.xcodeproj
+open Concerts.xcodeproj
+```
+In Xcode, open the **Concerts** target, go to **Signing & Capabilities**, and pick your team. Plug in your iPhone (turn on Settings → Privacy & Security → Developer Mode the first time), choose it as the run destination, and press ▶. To install without a cable, use **Product → Archive → Distribute App → TestFlight**.
+
+The app icon is drawn by `icons/make_icons.py` (`python3 icons/make_icons.py` regenerates every size).
+
 ## One-time GitHub Pages setup
 Repo **Settings → Pages → Source: GitHub Actions**. Every push to `master` then deploys via `.github/workflows/deploy.yml`.
 
