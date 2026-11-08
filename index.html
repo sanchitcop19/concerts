@@ -137,8 +137,9 @@ function normalize(rows,cols){
   return rows.map(r=>{
     const date=parseDate(r[cols.date]);
     let city=(r[cols.city]||"").trim();
-    if(!city&&cols.location) city=(r[cols.location]||"").split(",")[0].trim();
-    const state=(r[cols.state]||"").trim(), country=(r[cols.country]||"").trim();
+    let state=(r[cols.state]||"").trim(), country=(r[cols.country]||"").trim();
+    // A single "Location" column like "San Francisco, CA, United States"
+    if(!city&&cols.location){const p=(r[cols.location]||"").split(",").map(x=>x.trim());city=p[0]||"";state=state||p[1]||"";}
     const bands=splitBands(r[cols.bands],cols.bands);
     const title=(r[cols.title]||"").trim();
     return {date,bands:bands.length?bands:(title?[title]:[]),title,venue:(r[cols.venue]||"").trim(),
