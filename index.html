@@ -78,7 +78,8 @@ a{color:inherit}
 .chip span{font-size:12px;color:rgba(255,255,255,.62);text-transform:uppercase;letter-spacing:.08em}
 .next-up{margin-top:32px}
 .next-count{letter-spacing:.04em;text-transform:none;font-weight:500;color:rgba(255,255,255,.5);margin-left:6px}
-.tickets{display:flex;gap:12px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+/* Sideways only: if this row could scroll vertically, iOS would grab vertical swipes here and drag the tickets out of view. */
+.tickets{display:flex;gap:12px;margin-top:4px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:8px 0;scrollbar-width:none}
 .ticket{flex:0 0 auto;display:flex;align-items:stretch;background:#fff;color:#0f0e12;border-radius:12px;min-width:260px;max-width:340px;position:relative}
 .ticket .stub{padding:12px 14px;border-right:2px dashed #d9d5e8;text-align:center;min-width:72px}
 .ticket .stub .m{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#6250d6;font-weight:700}
