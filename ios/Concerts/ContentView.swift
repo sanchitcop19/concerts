@@ -80,7 +80,11 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     }
 
     @objc private func pulledToRefresh() {
-        loaded ? webView.reload() : load()
+        if loaded {
+            webView.reload()
+        } else {
+            load()
+        }
     }
 
     // MARK: WKNavigationDelegate
@@ -113,15 +117,13 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
 
     /// Links that leave the dashboard (e.g. a show's Concert Archives page) open in Safari.
     func webView(_ webView: WKWebView,
-                 decidePolicyFor navigationAction: WKNavigationAction,
-                 decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
+                 decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
         if let url = navigationAction.request.url,
            url.host != siteURL.host,
            navigationAction.navigationType == .linkActivated || navigationAction.targetFrame == nil {
-            UIApplication.shared.open(url)
-            decisionHandler(.cancel)
-            return
+            _ = await UIApplication.shared.open(url)
+            return .cancel
         }
-        decisionHandler(.allow)
+        return .allow
     }
 }
