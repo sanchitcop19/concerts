@@ -48,6 +48,7 @@
   --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .display{font-family:"Bricolage Grotesque",Inter,system-ui,sans-serif}
@@ -119,6 +120,11 @@ body.detail .hero h1{font-size:clamp(40px,8vw,96px);line-height:.95;letter-spaci
 body.detail .hero h1 small{font-size:clamp(18px,3vw,26px);color:rgba(255,255,255,.72);margin-top:14px;font-weight:600}
 .range a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
 a.ticket{text-decoration:none}
+.hero-actions{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#0f0e12;text-decoration:none;font-weight:600;font-size:14px;padding:10px 16px;border-radius:999px}
+.btn-hero:hover{background:#ece9f7}
+.show .date{color:inherit;text-decoration:none;border-radius:8px}
+a.date:hover .d{color:var(--accent-ink)}
 .lnk{color:inherit;text-decoration:none;border-radius:4px}
 .lnk:hover{color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
 .ext{display:grid;place-items:center;width:32px;height:32px;border-radius:999px;color:var(--ink-3);text-decoration:none}
@@ -127,15 +133,20 @@ a.ticket{text-decoration:none}
 /* Donut */
 .donut-wrap{position:relative;width:min(220px,100%);margin:4px auto 14px}
 .donut-wrap svg{display:block;width:100%;height:auto}
-.donut-wrap path,.donut-wrap circle{cursor:pointer;transition:opacity .15s}
+.donut-wrap path,.donut-wrap circle{cursor:pointer;outline:none;transition:opacity .15s}
 .donut-wrap:hover path:not(:hover){opacity:.45}
 .donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
 .donut-mid b{font:800 34px/1 "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.03em}
 .donut-mid span{font-size:12px;color:var(--ink-3);margin-top:4px;max-width:110px}
 .legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .legend-list li{display:grid;grid-template-columns:12px minmax(0,1fr) auto 42px;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;font-size:14px}
-.legend-list li[data-k]{cursor:pointer}
-.legend-list li[data-k]:hover{background:var(--surface-2)}
+.legend-list li[data-k],.legend-list li[data-other]{cursor:pointer}
+.legend-list li[data-k]:hover,.legend-list li[data-other]:hover{background:var(--surface-2)}
+.legend-list .chev{display:inline-block;color:var(--ink-3);font-size:11px;transition:transform .15s}
+.legend-list li.open .chev{transform:rotate(180deg)}
+.more-list{margin:4px 0 0 22px;padding-left:8px;border-left:2px solid var(--line);max-height:320px;overflow:auto}
+.more-list li{font-size:13px}
+.more-list .nm{font-weight:500}
 .legend-list .sw{width:12px;height:12px;border-radius:3px}
 .legend-list .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .legend-list .ct{font-weight:700;text-align:right}
@@ -185,6 +196,8 @@ a.ticket{text-decoration:none}
 .rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .rank li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;cursor:pointer}
 .rank li:hover{background:var(--surface-2)}
+.rank li.empty{display:block;cursor:default;padding:4px 0;margin:0}
+.rank li.empty:hover{background:none}
 .rank .i{color:var(--ink-3);font-size:12px;font-weight:600;text-align:right}
 .rank .nm{min-width:0}
 .rank .nm b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -235,6 +248,7 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
     <h1 class="display"><span id="heroNum" class="num">—</span><small id="heroSub">shows and counting</small></h1>
     <div class="range" id="heroRange"></div>
     <div class="chips" id="chips"></div>
+    <div class="hero-actions" id="heroActions" hidden></div>
     <div class="next-up" id="nextUp" hidden><div class="eyebrow">Next 2 weeks <span id="nextUpCount" class="next-count"></span></div>
     <div class="tickets" id="tickets"></div></div>
   </div>
@@ -285,14 +299,14 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
 
   <!-- Artist / venue / city page -->
   <div id="detail" hidden>
-    <section class="card">
+    <section class="card" id="dYearCard">
       <h2>Shows per year</h2>
       <p class="hint" id="dYearHint"></p>
       <div class="cols" id="dYearCols"></div>
     </section>
-    <section class="grid g-2e">
-      <div class="card"><h2 id="dATitle"></h2><p class="hint" id="dAHint"></p><ol class="rank" id="dA"></ol></div>
-      <div class="card"><h2 id="dBTitle"></h2><p class="hint" id="dBHint"></p><ol class="rank" id="dB"></ol></div>
+    <section class="grid g-2e" id="dGrid">
+      <div class="card" id="dACard"><h2 id="dATitle"></h2><p class="hint" id="dAHint"></p><ol class="rank" id="dA"></ol></div>
+      <div class="card" id="dBCard"><h2 id="dBTitle"></h2><p class="hint" id="dBHint"></p><ol class="rank" id="dB"></ol></div>
     </section>
   </div>
 
@@ -391,29 +405,40 @@ let ALL=[], YEAR="", Q="", SHOWN=40;
 const setYear=y=>{YEAR=YEAR===y?"":y;SHOWN=40;render()};
 const setQuery=q=>{Q=q;$("q").value=q;SHOWN=40;render();$("list").scrollIntoView({behavior:"smooth",block:"start"})};
 
-// ---------- Pages: #/artist/<name>, #/venue/<name>, #/city/<name> ----------
+// ---------- Pages: #/artist/<name>, #/venue/<name>, #/city/<name>, #/show/<id> ----------
 const KINDS={artist:{label:"Artist",match:(c,n)=>c.bands.includes(n)},
              venue:{label:"Venue",match:(c,n)=>c.venue===n},
              city:{label:"City",match:(c,n)=>c.place===n}};
 const hrefFor=(kind,name)=>`#/${kind}/${encodeURIComponent(name)}`;
 const link=(kind,name)=>`<a class="lnk" href="${hrefFor(kind,name)}">${esc(name)}</a>`;
 function route(){
-  const m=location.hash.match(/^#\/(artist|venue|city)\/(.+)$/);
+  const m=location.hash.match(/^#\/(artist|venue|city|show)\/(.+)$/);
   return m?{kind:m[1],name:decodeURIComponent(m[2])}:null;
 }
 // Remember scroll position per page so Back returns you where you were.
-const scrollMemo=new Map(); let lastHash=location.hash, navigatedInApp=false;
+// Each history entry records how many in-site steps deep it is (0 = where you arrived),
+// so Back goes to the previous page here, or to the dashboard, but never off the site.
+const scrollMemo=new Map(); let lastHash=location.hash;
 history.scrollRestoration="manual";
+if(!history.state||history.state.d==null) history.replaceState({d:0},"");
+let depth=history.state.d;
 addEventListener("hashchange",()=>{
-  scrollMemo.set(lastHash,scrollY); lastHash=location.hash; navigatedInApp=true; SHOWN=40;
+  if(!history.state||history.state.d==null) history.replaceState({d:depth+1},"");
+  depth=history.state.d;
+  scrollMemo.set(lastHash,scrollY); lastHash=location.hash; SHOWN=40;
   render(); scrollTo(0,scrollMemo.get(location.hash)||0);
 });
-$("back").onclick=e=>{e.preventDefault(); navigatedInApp?history.back():(location.hash="")};
+$("back").onclick=e=>{e.preventDefault(); depth>0?history.back():(location.hash="")};
 
 function render(){
   const r=route();
   document.body.classList.toggle("detail",!!r);
   $("dash").hidden=!!r; $("detail").hidden=!r; $("back").hidden=!r;
+  if(r&&r.kind==="show"){
+    const c=ALL.find(x=>x.id===r.name);
+    if(c) return renderShow(c);
+    location.replace("#"); return;
+  }
   if(r) return renderDetail(r);
   renderDash();
 }
@@ -424,7 +449,7 @@ function renderTickets(rows){
   const later=rows.filter(c=>c.status==="upcoming"&&c.date&&c.date.key>IN_2_WEEKS).length;
   $("nextUp").hidden=!upcoming.length;
   $("nextUpCount").textContent=`${plural(upcoming.length,"show")}${later?` · ${later} more after that`:""}`;
-  $("tickets").innerHTML=upcoming.map(c=>`<a class="ticket" href="${hrefFor("artist",c.bands[0]||"")}"><div class="stub"><div class="m">${MONTHS[c.date.m]}</div><div class="d">${c.date.d}</div></div><div class="info"><div class="tag-up">${whenLabel(c.date.key)}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></a>`).join("");
+  $("tickets").innerHTML=upcoming.map(c=>`<a class="ticket" href="${hrefFor("show",c.id)}"><div class="stub"><div class="m">${MONTHS[c.date.m]}</div><div class="d">${c.date.d}</div></div><div class="info"><div class="tag-up">${whenLabel(c.date.key)}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></a>`).join("");
 }
 
 function renderYearCols(el,rows,yearsAll,clickable){
@@ -437,25 +462,45 @@ function renderYearCols(el,rows,yearsAll,clickable){
   if(clickable) el.querySelectorAll(".col").forEach(c=>{c.onclick=()=>setYear(c.dataset.y);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setYear(c.dataset.y)}}});
 }
 
+const ord=n=>n+(n%100>=11&&n%100<=13?"th":["th","st","nd","rd"][n%10]||"th");
+const FULL_DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function setChips(chips){
+  chips=chips.filter(([v])=>v!==0&&v!=="#0");
+  $("chips").hidden=!chips.length;
+  $("chips").style.setProperty("--n",chips.length<=3?chips.length:2);
+  $("chips").innerHTML=chips.map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+}
+function box(id,title,hint,map,k){
+  $(id+"Card").hidden=!map.size;
+  $(id+"Title").textContent=title;$(id+"Hint").textContent=hint;rank($(id),map,k);
+}
+
 function renderDetail({kind,name}){
   const K=KINDS[kind];
   const all=ALL.filter(c=>K.match(c,name));
   const went=all.filter(attended);
   const dated=went.filter(c=>c.date).sort((a,b)=>a.date.t-b.date.t);
+  const next=all.filter(c=>c.status==="upcoming"&&c.date).sort((a,b)=>a.date.t-b.date.t)[0];
   const n=went.length;
   document.title=`${name} · Concert Archive`;
   $("eyebrow").textContent=K.label;
   $("heroNum").textContent=name;
-  $("heroSub").textContent=kind==="artist"?(n===1?"Seen once":`Seen ${n} times`):kind==="venue"?(n===1?"1 visit":`${n} visits`):plural(n,"show");
+  $("heroActions").hidden=true;
+  $("heroSub").textContent=
+    kind==="artist"?(n===0?"Not seen yet":n===1?"Seen once":`Seen ${n} times`):
+    kind==="venue"?(n===0?"No visits yet":n===1?"1 visit":`${n} visits`):
+    (n===0?"No shows yet":plural(n,"show"));
   // Where it sits in your all-time ranking
   const key={artist:c=>c.bands,venue:c=>c.venue,city:c=>c.place}[kind];
   const ranking=topN(count(ALL.filter(attended),key),1e9);
   const pos=ranking.findIndex(([k])=>k===name)+1;
 
-  let range="";
-  if(kind==="venue"&&all[0]?.place) range+=`${link("city",all[0].place)} · `;
-  range+=dated.length===1?`Once, on ${fmtDate(dated[0].date)}`:dated.length?`First ${fmtDate(dated[0].date)} · Latest ${fmtDate(dated.at(-1).date)}`:"";
-  $("heroRange").innerHTML=range;
+  const bits=[];
+  if(kind==="venue"&&all[0]?.place) bits.push(link("city",all[0].place));
+  if(dated.length===1) bits.push(`Once, on ${fmtDate(dated[0].date)}`);
+  else if(dated.length) bits.push(`First ${fmtDate(dated[0].date)}`,`Latest ${fmtDate(dated.at(-1).date)}`);
+  if(next) bits.push(`${n?"Next":"First time"}: <a href="${hrefFor("show",next.id)}">${fmtDate(next.date)}</a>`);
+  $("heroRange").innerHTML=bits.join(" · ");
 
   const artists=count(went,c=>c.bands), venues=count(went,c=>c.venue), cities=count(went,c=>c.place), years=new Set(dated.map(c=>c.date.y));
   const chips=[];
@@ -464,33 +509,81 @@ function renderDetail({kind,name}){
   if(kind==="artist") chips.push([cities.size,cities.size===1?"city":"cities"]);
   else chips.push([artists.size,artists.size===1?"artist":"artists"]);
   chips.push([years.size,years.size===1?"year":"years"]);
-  $("chips").style.setProperty("--n",chips.length<=3?chips.length:2);
-  $("chips").innerHTML=chips.map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  setChips(chips);
   renderTickets(all);
 
   const yearsAll=[...new Set(ALL.filter(attended).filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>a-b);
-  $("dYearHint").textContent=years.size?`Seen in ${plural(years.size,"year")} out of ${yearsAll.length}.`:"";
+  $("dYearCard").hidden=!dated.length;
+  $("dYearHint").textContent=`Seen in ${plural(years.size,"year")} out of ${yearsAll.length}.`;
   renderYearCols($("dYearCols"),went,yearsAll,false);
 
-  const box=(id,title,hint,map,k)=>{$(id+"Title").textContent=title;$(id+"Hint").textContent=hint;rank($(id),map,k)};
   if(kind==="artist"){
-    const others=count(went,c=>c.bands.filter(b=>b!==name));
     box("dA","Where you saw them","Venues, most visits first.",venues,"venue");
-    box("dB","Shared the bill with","Other acts on the same lineup.",others,"artist");
+    box("dB","Shared the bill with","Other acts on the same lineup.",count(went,c=>c.bands.filter(b=>b!==name)),"artist");
   }else if(kind==="venue"){
     const city=all[0]?.place;
-    const nearby=count(ALL.filter(attended).filter(c=>c.place===city&&c.venue!==name),c=>c.venue);
     box("dA","Artists seen here","Most-seen first.",artists,"artist");
-    box("dB",city?`Other venues in ${city.split(",")[0]}`:"Other venues","Where else you go nearby.",nearby,"venue");
+    box("dB",city?`Other venues in ${city.split(",")[0]}`:"Other venues","Where else you go nearby.",count(ALL.filter(attended).filter(c=>c.place===city&&c.venue!==name),c=>c.venue),"venue");
   }else{
     box("dA","Venues","Where you go in this city.",venues,"venue");
     box("dB","Artists","Most-seen here.",artists,"artist");
   }
-  renderList(all,n,kind==="artist"?"Every time you saw them":kind==="venue"?"Every show here":`Every show in ${name.split(",")[0]}`);
+  $("dGrid").hidden=$("dACard").hidden&&$("dBCard").hidden;
+  $("dGrid").style.gridTemplateColumns=$("dACard").hidden||$("dBCard").hidden?"minmax(0,1fr)":"";
+  renderList(all,n,n?(kind==="artist"?"Every time you saw them":kind==="venue"?"Every show here":`Every show in ${name.split(",")[0]}`):"Coming up");
+}
+
+// One concert: lineup, where it sits in your history, and other shows at the same venue.
+function renderShow(c){
+  const went=ALL.filter(attended);
+  const name=c.bands.join(" / ")||c.title||"Concert";
+  document.title=`${name} · Concert Archive`;
+  const up=c.status==="upcoming";
+  $("eyebrow").textContent=up&&c.date?`Concert · ${whenLabel(c.date.key)}`:attended(c)?"Concert":`Concert · ${c.status}`;
+  $("heroNum").textContent=name;
+  $("heroSub").textContent=c.date?`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`:"Date unknown";
+  $("heroRange").innerHTML=[c.title&&!c.bands.includes(c.title)?esc(c.title):"",c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ");
+
+  // Position in your history, counting this show even if it hasn't happened yet.
+  const chrono=(rows)=>[...new Set([...rows,c])].filter(x=>x.date).sort((a,b)=>a.date.t-b.date.t||a.id.localeCompare(b.id));
+  const nth=(rows)=>c.date?chrono(rows).indexOf(c)+1:0;
+  const before=went.filter(x=>x!==c&&x.date&&c.date&&x.date.t<c.date.t);
+  const firstTimers=c.bands.filter(b=>!before.some(x=>x.bands.includes(b))).length;
+  const chips=[];
+  if(c.bands.length>1) chips.push([c.bands.length,"acts"]);
+  // Upcoming shows count in date order too, so two shows tonight are 319th and 320th, not both 319th.
+  const counted=ALL.filter(x=>attended(x)||x.status==="upcoming");
+  if(c.venue) chips.push([ord(nth(counted.filter(x=>x.venue===c.venue))),"visit to this venue"]);
+  if(attended(c)||up) chips.push([ord(nth(counted)),"show overall"]);
+  if(firstTimers&&c.date) chips.push([firstTimers,firstTimers===1?"first-time act":"first-time acts"]);
+  setChips(chips);
+
+  $("heroActions").hidden=!c.url;
+  $("heroActions").innerHTML=c.url?`<a class="btn-hero" href="${esc(c.url)}" target="_blank" rel="noopener">Open on Concert Archives <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
+  $("nextUp").hidden=true;
+  $("dYearCard").hidden=true;
+
+  // Lineup: how many times you've seen each act in total.
+  const seen=count(went,x=>x.bands);
+  const lineup=new Map(c.bands.map(b=>[b,seen.get(b)||0]));
+  $("dACard").hidden=!lineup.size;
+  $("dATitle").textContent="Lineup";
+  $("dAHint").textContent="How many times you've seen each act, all time.";
+  const max=Math.max(1,...lineup.values());
+  $("dA").innerHTML=[...lineup].map(([b,v],i)=>`<li data-k="${esc(b)}" tabindex="0" role="link" title="${esc(b)}"><span class="i">${i+1}</span><span class="nm"><b>${esc(b)}</b><span class="mini"><i style="width:${v/max*100}%"></i></span></span><span class="ct num">${v?`${v}<small>×</small>`:'<small>First time</small>'}</span></li>`).join("");
+  $("dA").querySelectorAll("li[data-k]").forEach(li=>{const go=()=>{location.hash=hrefFor("artist",li.dataset.k)};li.onclick=go;li.onkeydown=e=>{if(e.key==="Enter")go()}});
+  $("dBCard").hidden=true;
+  $("dGrid").hidden=$("dACard").hidden;
+  $("dGrid").style.gridTemplateColumns="minmax(0,1fr)";
+
+  const others=c.venue?ALL.filter(x=>x!==c&&x.venue===c.venue):[];
+  renderList(others,others.filter(attended).length,c.venue?`More at ${c.venue}`:"More shows");
+  if(!others.length) $("list").innerHTML=`<div class="empty">${c.venue?"Your first show here.":"No other shows."}</div>`;
 }
 
 function renderDash(){
   document.title="Sanchit's Concert Archive";
+  $("heroActions").hidden=true; $("chips").hidden=false;
   const q=Q.trim().toLowerCase();
   const inYear=c=>!YEAR||(c.date&&String(c.date.y)===YEAR);
   const inQuery=c=>!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q);
@@ -587,13 +680,14 @@ function renderDonut(el,map,total,kind){
   if(!total){el.innerHTML='<div class="empty">Nothing here yet.</div>';return}
   const t=topN(map,4), rest=total-t.reduce((a,[,v])=>a+v,0), others=map.size-t.length;
   const slices=t.map(([k,v],i)=>({k,v,color:`var(--s${i+1})`,link:true}));
-  if(rest>0) slices.push({k:`${others} other ${others===1?"city":"cities"}`,v:rest,color:"var(--s-other)",link:false});
+  if(rest>0) slices.push({k:`${others} other ${others===1?"city":"cities"}`,v:rest,color:"var(--s-other)",link:false,other:true});
+  const restList=topN(map,1e9).slice(t.length);
   const R=96,r=60,C=100,pt=(rad,a)=>[C+rad*Math.sin(a),C-rad*Math.cos(a)];
   let a0=0,paths="";
   const pct=v=>Math.round(v/total*100);
   for(const sl of slices){
     const tip=`data-tip="<b>${esc(sl.k)}</b><br>${plural(sl.v,"show")} · ${pct(sl.v)}%"`;
-    const data=sl.link?`data-k="${esc(sl.k)}"`:"";
+    const data=sl.link?`data-k="${esc(sl.k)}"`:sl.other?"data-other":"";
     if(slices.length===1){paths+=`<circle cx="${C}" cy="${C}" r="${(R+r)/2}" fill="none" stroke="${sl.color}" stroke-width="${R-r}" ${tip} ${data}/>`;break}
     const a1=a0+sl.v/total*2*Math.PI, big=a1-a0>Math.PI?1:0;
     const [x0,y0]=pt(R,a0),[x1,y1]=pt(R,a1),[x2,y2]=pt(r,a1),[x3,y3]=pt(r,a0);
@@ -603,9 +697,13 @@ function renderDonut(el,map,total,kind){
   const lead=slices[0];
   el.innerHTML=`<div class="donut-wrap"><svg viewBox="0 0 200 200" role="img" aria-label="Shows by city">${paths}</svg>
     <div class="donut-mid"><b class="num">${pct(lead.v)}%</b><span>${esc(lead.k.split(",")[0])}</span></div></div>
-    <ul class="legend-list">${slices.map(sl=>`<li ${sl.link?`data-k="${esc(sl.k)}" tabindex="0" role="link"`:""}><i class="sw" style="background:${sl.color}"></i><span class="nm" title="${esc(sl.k)}">${esc(sl.k)}</span><span class="ct num">${sl.v}</span><span class="pc num">${pct(sl.v)}%</span></li>`).join("")}</ul>`;
+    <ul class="legend-list">${slices.map(sl=>`<li ${sl.link?`data-k="${esc(sl.k)}" tabindex="0" role="link"`:sl.other?`data-other tabindex="0" role="button" aria-expanded="false"`:""}><i class="sw" style="background:${sl.color}"></i><span class="nm" title="${esc(sl.k)}">${esc(sl.k)}${sl.other?' <span class="chev" aria-hidden="true">▾</span>':""}</span><span class="ct num">${sl.v}</span><span class="pc num">${pct(sl.v)}%</span></li>`).join("")}</ul>
+    <ul class="legend-list more-list" id="moreCities" hidden>${restList.map(([k,v])=>`<li data-k="${esc(k)}" tabindex="0" role="link"><i class="sw" style="background:var(--s-other)"></i><span class="nm" title="${esc(k)}">${esc(k)}</span><span class="ct num">${v}</span><span class="pc num">${pct(v)<1?"<1":pct(v)}%</span></li>`).join("")}</ul>`;
   const go=k=>{location.hash=hrefFor(kind,k)};
   el.querySelectorAll("[data-k]").forEach(n=>{n.onclick=()=>go(n.dataset.k);n.onkeydown=e=>{if(e.key==="Enter")go(n.dataset.k)}});
+  const toggle=()=>{const m=el.querySelector("#moreCities"),open=m.hidden;m.hidden=!open;
+    el.querySelectorAll("li[data-other]").forEach(li=>{li.setAttribute("aria-expanded",open);li.classList.toggle("open",open)})};
+  el.querySelectorAll("[data-other]").forEach(n=>{n.onclick=toggle;n.onkeydown=e=>{if(e.key==="Enter")toggle()}});
 }
 
 function renderList(rows,attendedCount,title){
@@ -621,7 +719,7 @@ function renderList(rows,attendedCount,title){
     const ext=c.url?`<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener" aria-label="Open on Concert Archives" title="Open on Concert Archives"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
     const tour=c.title&&!c.bands.includes(c.title)?`<div class="tour">${esc(c.title)}</div>`:"";
     const up=c.status==="upcoming";
-    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><div class="date"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></div><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
+    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><a class="date" href="${hrefFor("show",c.id)}" aria-label="Open this concert"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></a><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
   }
   if(cur)h+="</div>";
   $("list").innerHTML=h||'<div class="empty">No shows match.</div>';
@@ -643,6 +741,8 @@ async function load(){
   const parsed=Papa.parse(text.replace(/^﻿/,""),{header:true,skipEmptyLines:true});
   const cols=pickColumns(parsed.meta.fields||[]);
   ALL=normalize(parsed.data,cols);
+  // Stable id per show for #/show/<id>: the Concert Archives slug, else its row number.
+  ALL.forEach((c,i)=>{c.id=(c.url.split("/").filter(Boolean).pop()||"")||`row-${i}`});
   if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code>.</div>';
   const missing=["date","bands","venue"].filter(k=>!cols[k]);
   $("foot").innerHTML=`Data: ${esc(src)} · columns: ${Object.entries(cols).filter(([,v])=>v).map(([k,v])=>`${k} → “${esc(v)}”`).join(", ")}${missing.length?` · <b>missing: ${missing.join(", ")}</b>`:""}`;
