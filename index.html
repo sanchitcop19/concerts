@@ -44,7 +44,7 @@ select,input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-r
 .vbar .x{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
 .vbar.click{cursor:pointer}.vbar.click:hover .b{opacity:.8}
 .hbars{display:flex;flex-direction:column;gap:6px}
-.hrow{display:grid;grid-template-columns:minmax(0,1fr) 2fr 28px;gap:8px;align-items:center;font-size:13px}
+.hrow{display:grid;grid-template-columns:minmax(0,1.6fr) 1fr 28px;gap:8px;align-items:center;font-size:13px}
 .hrow .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hrow .track{background:var(--accent-soft);border-radius:4px;height:12px}
 .hrow .fill{background:var(--accent);height:100%;border-radius:4px}
@@ -55,6 +55,8 @@ th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertic
 th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 td.d{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
 .tablewrap{overflow-x:auto}
+tr.off td{opacity:.55}
+.status{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .tag{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:1px 8px;margin:1px 2px 1px 0;font-size:12px}
 footer{margin-top:24px;color:var(--muted);font-size:12px}
 a{color:var(--accent)}
@@ -74,6 +76,7 @@ a{color:var(--accent)}
     </div>
   </header>
   <div id="banner"></div>
+  <div id="upcoming"></div>
   <section class="kpis" id="kpis"></section>
   <section class="grid">
     <div class="card" style="grid-column:1/-1"><h2>Shows per year</h2><div id="byYear"></div></div>
@@ -101,6 +104,8 @@ const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov",
 const DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MONTH_IDX=Object.fromEntries(["january","february","march","april","may","june","july","august","september","october","november","december"].map((m,i)=>[m.slice(0,3),i]));
 const $=id=>document.getElementById(id);
+const TODAY=new Date().toISOString().slice(0,10);
+const attended=c=>c.status==="past"||c.status==="";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 // ---- Column detection: works with whatever headers the Concert Archives export uses ----
@@ -109,7 +114,8 @@ function pickColumns(headers){
   return {
     date:find(/date/i),
     bands:find(/band|artist|performer|lineup|act/i),
-    title:find(/concert|event|title|name|tour/i,/band|artist|venue|city/i),
+    title:find(/concert name|event name|^title$/i)||find(/concert|event|title|name|tour/i,/band|artist|venue|city|type|status|date|url/i),
+    status:find(/status/i),
     venue:find(/venue/i),
     city:find(/city|town/i),
     state:find(/state|region|province/i),
@@ -130,7 +136,8 @@ function fixY(y){return y<100?(y>50?1900+y:2000+y):y}
 function mk(y,mo,d){const dt=new Date(Date.UTC(y,mo,d));return {y,m:mo,d,dow:dt.getUTCDay(),key:`${y}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}}
 function splitBands(s,header){
   s=String(s||"").trim(); if(!s) return [];
-  let parts=/[;|\n]/.test(s)?s.split(/\s*[;|\n]\s*/):(/s\b/i.test(header||"")?s.split(/\s*,\s*/):[s]);
+  // Concert Archives uses " / " between bands. Never split on commas: "Tyler, The Creator" is one act.
+  const parts=s.split(/\s+\/\s+|\s*[;|\n]\s*/);
   return [...new Set(parts.map(p=>p.trim()).filter(Boolean))];
 }
 function normalize(rows,cols){
@@ -142,7 +149,10 @@ function normalize(rows,cols){
     if(!city&&cols.location){const p=(r[cols.location]||"").split(",").map(x=>x.trim());city=p[0]||"";state=state||p[1]||"";}
     const bands=splitBands(r[cols.bands],cols.bands);
     const title=(r[cols.title]||"").trim();
-    return {date,bands:bands.length?bands:(title?[title]:[]),title,venue:(r[cols.venue]||"").trim(),
+    // Status: Past / Upcoming / Cancelled / Rescheduled. Without a column, future dates count as upcoming.
+    let status=(r[cols.status]||"").trim().toLowerCase();
+    if(!status) status=date&&date.key>TODAY?"upcoming":"past";
+    return {date,status,bands:bands.length?bands:(title?[title]:[]),title,venue:(r[cols.venue]||"").trim(),
       city,place:[city,state||country].filter(Boolean).join(", ")};
   }).filter(c=>c.date||c.bands.length);
 }
@@ -166,7 +176,10 @@ function fmtDate(d){return !d?"—":d.m==null?String(d.y):`${MONTHS[d.m]} ${d.d}
 let ALL=[];
 function render(){
   const yr=$("year").value, q=$("q").value.trim().toLowerCase();
-  const list=ALL.filter(c=>(!yr||(c.date&&String(c.date.y)===yr))&&(!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q)));
+  const matches=ALL.filter(c=>(!yr||(c.date&&String(c.date.y)===yr))&&(!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q)));
+  const list=matches.filter(attended); // stats only count shows you actually went to
+  const upcoming=ALL.filter(c=>c.status==="upcoming").sort((a,b)=>(a.date?.key||"").localeCompare(b.date?.key||""));
+  $("upcoming").innerHTML=upcoming.length?`<div class="card" style="margin-bottom:16px"><h2>Coming up</h2>${upcoming.map(c=>`<div style="margin:4px 0"><b>${fmtDate(c.date)}</b> · ${c.bands.map(b=>`<span class="tag">${esc(b)}</span>`).join("")} <span class="sub">${esc([c.venue,c.place].filter(Boolean).join(", "))}</span></div>`).join("")}</div>`:"";
   const artists=count(list,c=>c.bands), venues=count(list,c=>c.venue), cities=count(list,c=>c.place);
   const dated=list.filter(c=>c.date).sort((a,b)=>a.date.key.localeCompare(b.date.key));
   const years=count(dated,c=>String(c.date.y));
@@ -181,7 +194,7 @@ function render(){
     kpi("Busiest year",topYear?topYear[0]:"—",topYear?`${topYear[1]} shows`:"");
 
   // Shows per year — always use full timeline so gaps show as zero
-  const allYears=ALL.filter(c=>c.date).map(c=>c.date.y);
+  const allYears=ALL.filter(c=>c.date&&attended(c)).map(c=>c.date.y);
   if(allYears.length){
     const lo=Math.min(...allYears),hi=Math.max(...allYears),ys=[];for(let y=lo;y<=hi;y++)ys.push(String(y));
     vbars($("byYear"),ys,ys.map(y=>years.get(y)||0),y=>{$("year").value=$("year").value===y?"":y;render()});
@@ -194,9 +207,10 @@ function render(){
   hbars($("topVenues"),venues,10,searchFor);
   hbars($("topCities"),cities,10,searchFor);
 
-  $("listTitle").textContent=`${yr||q?"Matching":"All"} shows (${list.length})`;
-  $("rows").innerHTML=[...list].sort((a,b)=>(b.date?.key||"").localeCompare(a.date?.key||"")).map(c=>
-    `<tr><td class="d">${fmtDate(c.date)}</td><td>${c.title&&!c.bands.includes(c.title)?`<div class="sub">${esc(c.title)}</div>`:""}${c.bands.map(b=>`<span class="tag">${esc(b)}</span>`).join("")}</td><td>${esc(c.venue)}</td><td class="hide-sm">${esc(c.place)}</td></tr>`
+  const skipped=matches.length-list.length;
+  $("listTitle").textContent=`${yr||q?"Matching":"All"} shows (${list.length}${skipped?` + ${skipped} upcoming/cancelled`:""})`;
+  $("rows").innerHTML=[...matches].sort((a,b)=>(b.date?.key||"").localeCompare(a.date?.key||"")).map(c=>
+    `<tr${attended(c)?"":' class="off"'}><td class="d">${fmtDate(c.date)}${attended(c)?"":`<div class="status">${esc(c.status)}</div>`}</td><td>${c.title&&!c.bands.includes(c.title)?`<div class="sub">${esc(c.title)}</div>`:""}${c.bands.map(b=>`<span class="tag">${esc(b)}</span>`).join("")}</td><td>${esc(c.venue)}</td><td class="hide-sm">${esc(c.place)}</td></tr>`
   ).join("")||'<tr><td colspan="4" class="empty">No shows match.</td></tr>';
 }
 
@@ -216,7 +230,7 @@ async function load(){
   if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">👋 Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code> to see your real shows.</div>';
   const ys=[...new Set(ALL.filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>b-a);
   $("year").insertAdjacentHTML("beforeend",ys.map(y=>`<option>${y}</option>`).join(""));
-  $("sub").textContent=`${ALL.length} shows · source: ${src}`;
+  $("sub").textContent=`${ALL.filter(attended).length} shows · source: ${src}`;
   const missing=Object.entries(cols).filter(([k,v])=>!v&&["date","bands","venue"].includes(k)).map(([k])=>k);
   $("foot").innerHTML=`Detected columns: ${Object.entries(cols).filter(([,v])=>v).map(([k,v])=>`${k} → “${esc(v)}”`).join(", ")}${missing.length?` · <b>Couldn’t find: ${missing.join(", ")}</b>`:""}`;
   $("year").onchange=render; $("q").oninput=render;

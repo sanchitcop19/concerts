@@ -41,8 +41,13 @@ async function open(page, url) {
 
 function toCsv(rows) {
   const q = v => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-  const lines = [['Date', 'Concert Name', 'Bands', 'Venue', 'Location', 'URL'].join(',')];
-  for (const r of rows) lines.push([r.date, r.title, r.bands.join('; '), r.venue, r.location, r.url].map(q).join(','));
+  // Same columns and band separator as Concert Archives' own export, so both sources look identical.
+  const today = new Date().toISOString().slice(0, 10);
+  const lines = [['Start Date', 'Status', 'Concert Name', 'Bands Seen', 'Venue', 'Location', 'URL'].join(',')];
+  for (const r of rows) {
+    const status = r.date && r.date > today ? 'Upcoming' : 'Past';
+    lines.push([r.date, status, r.title, r.bands.join(' / '), r.venue, r.location, r.url].map(q).join(','));
+  }
   return lines.join('\n') + '\n';
 }
 
