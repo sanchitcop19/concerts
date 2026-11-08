@@ -50,6 +50,8 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
+/* No rubber-band past the top/bottom (it showed empty space above the hero) */
+html,body{overscroll-behavior-y:none}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .display{font-family:"Bricolage Grotesque",Inter,system-ui,sans-serif}
 .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
@@ -113,6 +115,22 @@ main{padding:24px 0 72px}
 .g-2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .g-2e{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (max-width:860px){.g-3,.g-2,.g-2e{grid-template-columns:minmax(0,1fr)}}
+/* iPhone app tabs. Each tab loads the page with ?view=…; artist/venue/concert pages (body.detail) are unaffected. */
+body.view-home:not(.detail) .bar,body.view-home:not(.detail) #dash,body.view-home:not(.detail) #listSec,body.view-home:not(.detail) #chips{display:none!important}
+body.view-home:not(.detail) .tickets{flex-direction:column;overflow:visible;padding:6px 0}
+body.view-home:not(.detail) .ticket{max-width:none;min-width:0;width:100%}
+body.view-home:not(.detail) .hero{min-height:100vh}
+body.view-stats:not(.detail) .bar,body.view-stats:not(.detail) #nextUp,body.view-stats:not(.detail) #yearCard,body.view-stats:not(.detail) #heatCard,body.view-stats:not(.detail) #listSec{display:none!important}
+body.view-stats:not(.detail) #heatDow{grid-template-columns:minmax(0,1fr)}
+body.view-stats:not(.detail) #facts{margin-top:0}
+body.view-years:not(.detail) #nextUp,body.view-years:not(.detail) .search,body.view-years:not(.detail) #listSec,body.view-years:not(.detail) .pill[data-y=""]{display:none!important}
+body.view-shows:not(.detail) #dash,body.view-shows:not(.detail) #nextUp,body.view-shows:not(.detail) #chips,body.view-shows:not(.detail) .years{display:none!important}
+body.view-shows:not(.detail) .search{flex:1 1 100%}
+body.view-shows:not(.detail) .list-head{margin-top:8px}
+body.view-shows:not(.detail) #listTitle{display:none}
+body[class*="view-"] footer{display:none}
+body.view-stats:not(.detail) .hero h1,body.view-shows:not(.detail) .hero h1{font-size:clamp(44px,12vw,80px);line-height:.95;letter-spacing:-.035em}
+body.view-stats:not(.detail) .hero,body.view-shows:not(.detail) .hero{padding-bottom:28px}
 /* Detail pages: the name is the headline, no filter bar */
 .back{display:inline-flex;align-items:center;gap:4px;color:rgba(255,255,255,.8);text-decoration:none;font-weight:600;font-size:14px;margin:-8px 0 18px -4px;padding:6px 10px 6px 4px;border-radius:999px}
 .back:hover{background:rgba(255,255,255,.1);color:#fff}
@@ -250,6 +268,7 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
     <div class="range" id="heroRange"></div>
     <div class="chips" id="chips"></div>
     <div class="hero-actions" id="heroActions" hidden></div>
+    <p class="range" id="noUpcoming" hidden>Nothing booked for the next 2 weeks.</p>
     <div class="next-up" id="nextUp" hidden><div class="eyebrow">Next 2 weeks <span id="nextUpCount" class="next-count"></span></div>
     <div class="tickets" id="tickets"></div></div>
   </div>
@@ -270,7 +289,7 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
   <p class="filter-note" id="note" hidden></p>
 
   <div id="dash">
-  <section class="card">
+  <section class="card" id="yearCard">
     <h2>Shows per year</h2>
     <p class="hint">Tap a year to see that year in review.</p>
     <div class="cols" id="yearCols"></div>
@@ -278,13 +297,13 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
 
   <section class="facts" id="facts"></section>
 
-  <section class="grid g-2">
-    <div class="card">
+  <section class="grid g-2" id="heatDow">
+    <div class="card" id="heatCard">
       <h2>Every month, every year</h2>
       <p class="hint">Darker means more shows that month.</p>
       <div id="heat"></div>
     </div>
-    <div class="card">
+    <div class="card" id="dowCard">
       <h2>Favorite night out</h2>
       <p class="hint">Shows by day of the week.</p>
       <div class="dow" id="dow"></div>
@@ -311,9 +330,11 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
     </section>
   </div>
 
+  <section id="listSec">
   <div class="list-head"><h2 id="listTitle">Every show</h2><span id="listCount"></span></div>
   <div id="list"></div>
   <button class="more" id="more" hidden>Show more</button>
+  </section>
 
   <footer id="foot"></footer>
 </main>
@@ -403,7 +424,11 @@ document.addEventListener("scroll",()=>tip.classList.remove("on"),{passive:true}
 
 // ---------- State ----------
 let ALL=[], YEAR="", Q="", SHOWN=40;
-const setYear=y=>{YEAR=YEAR===y?"":y;SHOWN=40;render()};
+// Which app tab this page is (?view=home|stats|years|shows). Empty on the normal website.
+const VIEW=(new URLSearchParams(location.search).get("view")||"").toLowerCase();
+if(VIEW) document.body.classList.add("view-"+VIEW);
+// On the Years tab a year is always selected, so tapping it again doesn't fall back to "all time".
+const setYear=y=>{YEAR=YEAR===y&&VIEW!=="years"?"":y;SHOWN=40;render()};
 const setQuery=q=>{Q=q;$("q").value=q;SHOWN=40;render();$("list").scrollIntoView({behavior:"smooth",block:"start"})};
 
 // ---------- Pages: #/artist/<name>, #/venue/<name>, #/city/<name>, #/show/<id> ----------
@@ -433,6 +458,7 @@ $("back").onclick=e=>{e.preventDefault(); depth>0?history.back():(location.hash=
 
 function render(){
   const r=route();
+  $("noUpcoming").hidden=true;
   document.body.classList.toggle("detail",!!r);
   $("dash").hidden=!!r; $("detail").hidden=!r; $("back").hidden=!r;
   if(r&&r.kind==="show"){
@@ -585,6 +611,8 @@ function renderShow(c){
 function renderDash(){
   document.title="Sanchit's Concert Archive";
   $("heroActions").hidden=true; $("chips").hidden=false;
+  if(VIEW==="stats"||VIEW==="home"){YEAR="";Q=""}
+  if(VIEW==="years"&&!YEAR){const ys=ALL.filter(c=>attended(c)&&c.date).map(c=>c.date.y);if(ys.length)YEAR=String(Math.max(...ys))}
   const q=Q.trim().toLowerCase();
   const inYear=c=>!YEAR||(c.date&&String(c.date.y)===YEAR);
   const inQuery=c=>!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q);
@@ -602,6 +630,17 @@ function renderDash(){
   $("chips").innerHTML=heroStats(list,went,artists,venues,cities)
     .map(([v,l,tip])=>`<div class="chip" data-tip="${esc(tip)}"><b class="num">${v}</b><span>${l}</span></div>`).join("");
   renderTickets(ALL);
+  $("noUpcoming").hidden=!(VIEW==="home"&&$("nextUp").hidden);
+  if(VIEW==="stats"){
+    $("eyebrow").textContent="All time";
+    $("heroNum").textContent="Your stats";
+    $("heroSub").textContent=`${plural(list.length,"show")} since ${dated.length?dated[0].date.y:"—"}`;
+  }else if(VIEW==="shows"){
+    $("eyebrow").textContent="Concert archive";
+    $("heroNum").textContent="Every show";
+    $("heroSub").textContent=Q?`${list.length} ${list.length===1?"match":"matches"}`:plural(list.length,"show");
+    $("heroRange").textContent="";
+  }
 
   // Year pills
   const yearsAll=[...new Set(went.filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>a-b);

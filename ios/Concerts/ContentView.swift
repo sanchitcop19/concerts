@@ -1,21 +1,82 @@
 import SwiftUI
 import WebKit
 
-/// The live dashboard. The app shows this page, so every data update or design
-/// change on the website shows up in the app with no new build.
-let siteURL = URL(string: "https://sanchitcop19.github.io/concerts/")!
+/// The live dashboard. Each tab shows one part of it (?view=…), so every data
+/// update or design change on the website shows up in the app with no new build.
+let siteRoot = "https://sanchitcop19.github.io/concerts/"
 
 /// Same near-black as the page's hero, so launch → page has no white flash.
 let heroBlack = Color(red: 11 / 255, green: 10 / 255, blue: 16 / 255)
 
+enum AppTab: String, CaseIterable, Identifiable {
+    case home, stats, years, shows
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .home: return "Home"
+        case .stats: return "Stats"
+        case .years: return "Years"
+        case .shows: return "Shows"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .home: return "ticket.fill"
+        case .stats: return "chart.bar.fill"
+        case .years: return "calendar"
+        case .shows: return "music.note.list"
+        }
+    }
+
+    var url: URL { URL(string: "\(siteRoot)?view=\(rawValue)")! }
+}
+
 struct ContentView: View {
-    @StateObject private var page = PageModel()
+    // One web view per tab, so each keeps its own scroll position and back history.
+    @StateObject private var home = PageModel(url: AppTab.home.url)
+    @StateObject private var stats = PageModel(url: AppTab.stats.url)
+    @StateObject private var years = PageModel(url: AppTab.years.url)
+    @StateObject private var shows = PageModel(url: AppTab.shows.url)
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        TabView {
+            ForEach(AppTab.allCases) { tab in
+                TabPage(page: model(for: tab))
+                    .tabItem { Label(tab.title, systemImage: tab.icon) }
+                    .tag(tab)
+            }
+        }
+        .tint(Color(red: 144 / 255, green: 133 / 255, blue: 233 / 255))
+        // No pull-to-refresh (the page doesn't bounce), so refresh when you come back to the app.
+        .onChange(of: scenePhase) { phase in
+            if phase == .active {
+                AppTab.allCases.forEach { model(for: $0).refreshIfStale() }
+            }
+        }
+    }
+
+    private func model(for tab: AppTab) -> PageModel {
+        switch tab {
+        case .home: return home
+        case .stats: return stats
+        case .years: return years
+        case .shows: return shows
+        }
+    }
+}
+
+struct TabPage: View {
+    @ObservedObject var page: PageModel
 
     var body: some View {
         ZStack {
             heroBlack.ignoresSafeArea()
             WebView(webView: page.webView)
-                .ignoresSafeArea() // the page pads itself for the notch/status bar
+                // Run under the status bar (the page pads itself for it), but stop above the tab bar.
+                .ignoresSafeArea(edges: .top)
                 .opacity(page.loaded ? 1 : 0)
                 .animation(.easeOut(duration: 0.25), value: page.loaded)
 
@@ -49,10 +110,13 @@ struct WebView: UIViewRepresentable {
 final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     @Published var loaded = false
     @Published var failed = false
+    let url: URL
     let webView: WKWebView
     private var triedCache = false
+    private var lastLoaded = Date.distantPast
 
-    override init() {
+    init(url: URL) {
+        self.url = url
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .default() // keeps the HTTP cache so the last page works offline
         webView = WKWebView(frame: .zero, configuration: config)
@@ -63,12 +127,9 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.allowsBackForwardNavigationGestures = true // swipe back from an artist/venue/city page
-
-        let refresh = UIRefreshControl()
-        refresh.tintColor = .white
-        refresh.addTarget(self, action: #selector(pulledToRefresh), for: .valueChanged)
-        webView.scrollView.refreshControl = refresh
+        // No rubber-band: pulling past the top or bottom doesn't reveal empty space.
+        webView.scrollView.bounces = false
+        webView.allowsBackForwardNavigationGestures = true // swipe back from an artist/venue/concert page
 
         load()
     }
@@ -76,10 +137,12 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     func load() {
         failed = false
         triedCache = false
-        webView.load(URLRequest(url: siteURL, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
+        webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
     }
 
-    @objc private func pulledToRefresh() {
+    /// Reload if this tab hasn't been refreshed for a minute (called when the app comes back to the foreground).
+    func refreshIfStale() {
+        guard Date().timeIntervalSince(lastLoaded) > 60 else { return }
         if loaded {
             webView.reload()
         } else {
@@ -92,7 +155,7 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         loaded = true
         failed = false
-        webView.scrollView.refreshControl?.endRefreshing()
+        lastLoaded = Date()
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -104,12 +167,11 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     }
 
     private func handle(_ error: Error) {
-        webView.scrollView.refreshControl?.endRefreshing()
         if (error as NSError).code == NSURLErrorCancelled { return }
         // Offline: fall back to the last copy we downloaded, if there is one.
         if !triedCache {
             triedCache = true
-            webView.load(URLRequest(url: siteURL, cachePolicy: .returnCacheDataDontLoad))
+            webView.load(URLRequest(url: url, cachePolicy: .returnCacheDataDontLoad))
             return
         }
         if !loaded { failed = true }
@@ -118,10 +180,10 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
     /// Links that leave the dashboard (e.g. a show's Concert Archives page) open in Safari.
     func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        if let url = navigationAction.request.url,
-           url.host != siteURL.host,
+        if let target = navigationAction.request.url,
+           target.host != url.host,
            navigationAction.navigationType == .linkActivated || navigationAction.targetFrame == nil {
-            _ = await UIApplication.shared.open(url)
+            _ = await UIApplication.shared.open(target)
             return .cancel
         }
         return .allow
