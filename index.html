@@ -3,112 +3,262 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Concert Archive</title>
+<title>Sanchit's Concert Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --bg:#f7f6f3;--card:#fff;--ink:#1d1b20;--muted:#6b6670;--line:#e6e2dc;
-  --accent:#6d4ae0;--accent-soft:#e9e3fc;--warn-bg:#fff4d6;--warn-ink:#6b4e00;
+  color-scheme:light;
+  --bg:#f4f2ee;--surface:#fcfcfb;--surface-2:#f0eee9;--line:#e4e1da;
+  --ink:#0f0e12;--ink-2:#4d4a55;--ink-3:#8a8691;
+  --accent:#6250d6;--accent-ink:#4a3bb3;
+  --heat-0:#ece9f7;--heat-1:#cdc5f4;--heat-2:#a597ec;--heat-3:#7d6ae0;--heat-4:#5541c9;--heat-5:#3a2a96;
+  --shadow:0 1px 2px rgba(20,16,40,.04),0 8px 24px rgba(20,16,40,.06);
 }
-@media (prefers-color-scheme: dark){
+@media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#141317;--card:#1e1c22;--ink:#f1eef5;--muted:#a49dab;--line:#2f2c35;
-    --accent:#a58bff;--accent-soft:#2c2540;--warn-bg:#3a3020;--warn-ink:#f3d58a;
+    color-scheme:dark;
+    --bg:#0e0d12;--surface:#17161c;--surface-2:#1f1e26;--line:#2a2833;
+    --ink:#f2f0f7;--ink-2:#bdb8c9;--ink-3:#837e8f;
+    --accent:#9085e9;--accent-ink:#b4abf2;
+    --heat-0:#221f2e;--heat-1:#342c5e;--heat-2:#4b3d93;--heat-3:#6754c4;--heat-4:#8a79e6;--heat-5:#b9adf7;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#141317;--card:#1e1c22;--ink:#f1eef5;--muted:#a49dab;--line:#2f2c35;
-  --accent:#a58bff;--accent-soft:#2c2540;--warn-bg:#3a3020;--warn-ink:#f3d58a;
+  color-scheme:dark;
+  --bg:#0e0d12;--surface:#17161c;--surface-2:#1f1e26;--line:#2a2833;
+  --ink:#f2f0f7;--ink-2:#bdb8c9;--ink-3:#837e8f;
+  --accent:#9085e9;--accent-ink:#b4abf2;
+  --heat-0:#221f2e;--heat-1:#342c5e;--heat-2:#4b3d93;--heat-3:#6754c4;--heat-4:#8a79e6;--heat-5:#b9adf7;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between;margin-bottom:20px}
-h1{margin:0;font-size:28px;letter-spacing:-.02em}
-.sub{color:var(--muted);font-size:13px}
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-select,input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
-.banner{background:var(--warn-bg);color:var(--warn-ink);padding:10px 14px;border-radius:10px;margin-bottom:16px;font-size:14px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
-.kpi,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.kpi .v{font-size:26px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-.kpi .s{color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:12px}
-.card h2{font-size:14px;margin:0 0 12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.vbars{display:flex;align-items:flex-end;gap:4px;height:160px}
-.vbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0;cursor:default}
-.vbar .b{width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
-.vbar .n{font-size:11px;color:var(--muted);margin-bottom:3px;font-variant-numeric:tabular-nums}
-.vbar .x{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap}
-.vbar.click{cursor:pointer}.vbar.click:hover .b{opacity:.8}
-.hbars{display:flex;flex-direction:column;gap:6px}
-.hrow{display:grid;grid-template-columns:minmax(0,1.6fr) 1fr 28px;gap:8px;align-items:center;font-size:13px}
-.hrow .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hrow .track{background:var(--accent-soft);border-radius:4px;height:12px}
-.hrow .fill{background:var(--accent);height:100%;border-radius:4px}
-.hrow .c{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
-.empty{color:var(--muted);font-size:13px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-td.d{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
-.tablewrap{overflow-x:auto}
-tr.off td{opacity:.55}
-.status{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-.tag{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:1px 8px;margin:1px 2px 1px 0;font-size:12px}
-footer{margin-top:24px;color:var(--muted);font-size:12px}
-a{color:var(--accent)}
-@media (max-width:600px){.hide-sm{display:none}}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.display{font-family:"Bricolage Grotesque",Inter,system-ui,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.num{font-variant-numeric:tabular-nums}
+a{color:inherit}
+
+/* ---------- Hero: a gig poster. Dark in both themes on purpose. ---------- */
+.hero{position:relative;overflow:hidden;color:#fff;background:#0b0a10;padding:56px 0 40px;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:-40% -10% auto -10%;height:140%;z-index:-1;
+  background:radial-gradient(40% 50% at 18% 30%,rgba(124,92,255,.55),transparent 70%),
+             radial-gradient(35% 45% at 82% 20%,rgba(255,77,141,.42),transparent 70%),
+             radial-gradient(45% 55% at 60% 90%,rgba(255,163,72,.22),transparent 70%);
+  filter:blur(10px)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.18;
+  background-image:radial-gradient(rgba(255,255,255,.5) 1px,transparent 1px);background-size:22px 22px;
+  mask-image:linear-gradient(to bottom,#000,transparent 85%)}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600}
+.hero h1{margin:10px 0 0;font-weight:800;line-height:.86;letter-spacing:-.045em;font-size:clamp(88px,19vw,200px)}
+.hero h1 small{display:block;font-size:clamp(20px,3.6vw,34px);letter-spacing:-.02em;font-weight:700;margin-top:10px;color:rgba(255,255,255,.88)}
+.hero .range{margin-top:10px;color:rgba(255,255,255,.6);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);
+  border-radius:14px;padding:12px 16px;min-width:120px}
+.chip b{display:block;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.chip span{font-size:12px;color:rgba(255,255,255,.62);text-transform:uppercase;letter-spacing:.08em}
+.tickets{display:flex;gap:12px;margin-top:28px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.ticket{flex:0 0 auto;display:flex;align-items:stretch;background:#fff;color:#0f0e12;border-radius:12px;min-width:260px;max-width:340px;position:relative}
+.ticket .stub{padding:12px 14px;border-right:2px dashed #d9d5e8;text-align:center;min-width:72px}
+.ticket .stub .m{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#6250d6;font-weight:700}
+.ticket .stub .d{font-size:28px;font-weight:800;line-height:1}
+.ticket .info{padding:12px 14px;min-width:0}
+.ticket .info .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket .info .v{font-size:12px;color:#5d5a66;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket .tag-up{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#c2185b;font-weight:700}
+.ticket::before,.ticket::after{content:"";position:absolute;left:79px;width:14px;height:14px;border-radius:50%;background:#0b0a10}
+.ticket::before{top:-7px}.ticket::after{bottom:-7px}
+
+/* ---------- Sticky filter bar ---------- */
+.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;gap:10px;align-items:center;padding-top:10px;padding-bottom:10px}
+.years{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.years::-webkit-scrollbar,.tickets::-webkit-scrollbar{display:none}
+.pill{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font:500 13px Inter,sans-serif;cursor:pointer}
+.pill:hover{border-color:var(--accent);color:var(--ink)}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{position:relative;flex:0 1 260px}
+.search input{width:100%;font:14px Inter,sans-serif;padding:8px 12px 8px 34px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.filter-note{font-size:13px;color:var(--ink-2);margin:14px 0 0}
+.filter-note button{border:0;background:none;color:var(--accent-ink);font:600 13px Inter,sans-serif;cursor:pointer;padding:0 0 0 6px}
+
+/* ---------- Cards & sections ---------- */
+main{padding:24px 0 72px}
+.grid{display:grid;gap:16px;margin-top:16px}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+@media (max-width:860px){.g-3,.g-2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.card h2{margin:0 0 4px;font:700 18px "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.01em}
+.card .hint{margin:0 0 16px;color:var(--ink-3);font-size:13px}
+
+/* Year columns */
+.cols{display:flex;align-items:flex-end;gap:6px;height:200px;padding-top:22px}
+.col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;position:relative}
+.col .b{width:100%;max-width:56px;background:var(--heat-3);border-radius:4px 4px 0 0;min-height:2px;transition:background .15s,opacity .15s}
+.col .v{font-size:12px;color:var(--ink-2);margin-bottom:6px;font-weight:600}
+.col .x{font-size:12px;color:var(--ink-3);margin-top:8px}
+.col:hover .b{background:var(--heat-4)}
+.cols.has-sel .col:not(.sel) .b{opacity:.35}
+.col.sel .b{background:var(--accent)}
+.col.sel .x{color:var(--ink);font-weight:600}
+.baseline{height:1px;background:var(--line);margin-top:-27px;margin-bottom:26px}
+
+/* Heatmap: years × months */
+.heat{display:grid;grid-template-columns:44px repeat(12,minmax(0,1fr));gap:3px;font-size:11px;color:var(--ink-3)}
+.heat .yl{display:flex;align-items:center;font-weight:500}
+.heat .ml{text-align:center;padding-bottom:2px}
+.heat .c{aspect-ratio:1.5/1;border-radius:4px;background:var(--heat-0)}
+.heat .c[data-n]:hover{outline:2px solid var(--ink);outline-offset:1px}
+.legend{display:flex;align-items:center;gap:4px;margin-top:12px;font-size:11px;color:var(--ink-3);justify-content:flex-end}
+.legend i{width:14px;height:10px;border-radius:3px;display:inline-block}
+
+/* Weekday bars */
+.dow{display:flex;flex-direction:column;gap:8px}
+.dow-row{display:grid;grid-template-columns:38px 1fr 30px;gap:10px;align-items:center;font-size:13px}
+.track{height:14px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.fill{height:100%;background:var(--heat-3);border-radius:0 4px 4px 0}
+.dow-row .n{text-align:right;color:var(--ink-2);font-weight:600}
+.dow-row.top .fill{background:var(--accent)}
+
+/* Facts */
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:16px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.fact .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.fact .v{font:700 24px/1.15 "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.02em;margin-top:6px}
+.fact .s{font-size:13px;color:var(--ink-2);margin-top:4px}
+
+/* Leaderboards */
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.rank li{display:grid;grid-template-columns:22px 34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;cursor:pointer}
+.rank li:hover{background:var(--surface-2)}
+.rank .i{color:var(--ink-3);font-size:12px;font-weight:600;text-align:right}
+.rank .av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:700 13px "Bricolage Grotesque",sans-serif;color:#fff;background:linear-gradient(135deg,#7c5cff,#ff4d8d)}
+.rank .av.venue{background:linear-gradient(135deg,#2a78d6,#7c5cff)}
+.rank .av.city{background:linear-gradient(135deg,#ff8a3d,#ff4d8d)}
+.rank .nm{min-width:0}
+.rank .nm b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank .nm .mini{height:4px;border-radius:2px;background:var(--surface-2);margin-top:5px;overflow:hidden}
+.rank .nm .mini i{display:block;height:100%;background:var(--heat-3);border-radius:2px}
+.rank .ct{font-weight:700;font-size:14px;color:var(--ink)}
+.rank .ct small{font-weight:500;color:var(--ink-3)}
+.empty{color:var(--ink-3);font-size:14px;padding:8px 0}
+
+/* Show list */
+.list-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:40px}
+.list-head h2{margin:0;font:800 32px "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.03em}
+.list-head span{color:var(--ink-3);font-size:14px}
+.month{margin-top:22px}
+.month h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.show{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:8px;text-decoration:none;transition:border-color .15s,transform .15s}
+a.show:hover{border-color:var(--accent);transform:translateY(-1px)}
+.show .date{text-align:center;border-right:1px dashed var(--line);padding-right:14px}
+.show .date .d{font:800 24px/1 "Bricolage Grotesque",sans-serif}
+.show .date .w{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.show .acts{font-weight:600;line-height:1.35}
+.show .acts .sep{color:var(--ink-3);font-weight:400;padding:0 4px}
+.show .tour{font-size:12px;color:var(--accent-ink);margin-bottom:2px;font-weight:500}
+.show .where{font-size:13px;color:var(--ink-2);margin-top:2px}
+.badge{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.show.off{opacity:.6}
+.show.off .acts{text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.show.up{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.badge.up{background:var(--accent);color:#fff}
+.more{display:block;margin:20px auto 0;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 20px;font:600 14px Inter,sans-serif;cursor:pointer}
+.more:hover{border-color:var(--accent)}
+@media (max-width:600px){.bar .wrap{flex-wrap:wrap}.years{flex-basis:100%;order:2}.search{flex:1 1 100%}.show{grid-template-columns:48px minmax(0,1fr)}.show .badge-wrap{display:none}.cols{height:160px}.col .v{font-size:10px}.col .x{font-size:10px}}
+
+/* Tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.35;max-width:240px;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#tip.on{opacity:1;transform:none}
+#tip b{font-size:14px}
+.banner{background:#fff4d6;color:#6b4e00;border-radius:12px;padding:10px 14px;font-size:14px;margin-top:16px}
+footer{color:var(--ink-3);font-size:12px;margin-top:40px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>🎸 My Concert Archive</h1>
-      <div class="sub" id="sub">Loading…</div>
-    </div>
-    <div class="controls">
-      <select id="year" aria-label="Filter by year"><option value="">All years</option></select>
-      <input id="q" type="search" placeholder="Search band, venue, city…" aria-label="Search">
-    </div>
-  </header>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow" id="eyebrow">Concert archive</div>
+    <h1 class="display"><span id="heroNum" class="num">—</span><small id="heroSub">shows and counting</small></h1>
+    <div class="range" id="heroRange"></div>
+    <div class="chips" id="chips"></div>
+    <div class="tickets" id="tickets"></div>
+  </div>
+</header>
+
+<nav class="bar" aria-label="Filters">
+  <div class="wrap">
+    <div class="years" id="years" role="group" aria-label="Year"></div>
+    <label class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search artists, venues, cities" aria-label="Search">
+    </label>
+  </div>
+</nav>
+
+<main class="wrap">
   <div id="banner"></div>
-  <div id="upcoming"></div>
-  <section class="kpis" id="kpis"></section>
-  <section class="grid">
-    <div class="card" style="grid-column:1/-1"><h2>Shows per year</h2><div id="byYear"></div></div>
-  </section>
-  <section class="grid">
-    <div class="card"><h2>By month</h2><div id="byMonth"></div></div>
-    <div class="card"><h2>By day of week</h2><div id="byDow"></div></div>
-  </section>
-  <section class="grid">
-    <div class="card"><h2>Most-seen artists</h2><div id="topArtists"></div></div>
-    <div class="card"><h2>Top venues</h2><div id="topVenues"></div></div>
-    <div class="card"><h2>Top cities</h2><div id="topCities"></div></div>
-  </section>
+  <p class="filter-note" id="note" hidden></p>
+
   <section class="card">
-    <h2 id="listTitle">All shows</h2>
-    <div class="tablewrap"><table>
-      <thead><tr><th>Date</th><th>Artists</th><th>Venue</th><th class="hide-sm">City</th></tr></thead>
-      <tbody id="rows"></tbody>
-    </table></div>
+    <h2>Shows per year</h2>
+    <p class="hint">Tap a year to see that year in review.</p>
+    <div class="cols" id="yearCols"></div>
+    <div class="baseline"></div>
   </section>
+
+  <section class="facts" id="facts"></section>
+
+  <section class="grid g-2">
+    <div class="card">
+      <h2>Every month, every year</h2>
+      <p class="hint">Darker means more shows that month.</p>
+      <div id="heat"></div>
+    </div>
+    <div class="card">
+      <h2>Favorite night out</h2>
+      <p class="hint">Shows by day of the week.</p>
+      <div class="dow" id="dow"></div>
+    </div>
+  </section>
+
+  <section class="grid g-3">
+    <div class="card"><h2>Most-seen artists</h2><p class="hint">Tap to see every show.</p><ol class="rank" id="topArtists"></ol></div>
+    <div class="card"><h2>Home venues</h2><p class="hint">Where you keep ending up.</p><ol class="rank" id="topVenues"></ol></div>
+    <div class="card"><h2>Cities</h2><p class="hint">Shows by city.</p><ol class="rank" id="topCities"></ol></div>
+  </section>
+
+  <div class="list-head"><h2 id="listTitle">Every show</h2><span id="listCount"></span></div>
+  <div id="list"></div>
+  <button class="more" id="more" hidden>Show more</button>
+
   <footer id="foot"></footer>
-</div>
+</main>
+<div id="tip" role="tooltip"></div>
+
 <script>
 const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_LONG=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const MONTH_IDX=Object.fromEntries(["january","february","march","april","may","june","july","august","september","october","november","december"].map((m,i)=>[m.slice(0,3),i]));
+const DOWS_LONG=["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
+const MONTH_IDX=Object.fromEntries(MONTHS_LONG.map((m,i)=>[m.slice(0,3).toLowerCase(),i]));
 const $=id=>document.getElementById(id);
 const TODAY=new Date().toISOString().slice(0,10);
 const attended=c=>c.status==="past"||c.status==="";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
+const initials=s=>s.replace(/^the\s+/i,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 
-// ---- Column detection: works with whatever headers the Concert Archives export uses ----
+// ---------- Reading the export (column names are detected, not hard-coded) ----------
 function pickColumns(headers){
   const find=(re,not)=>headers.find(h=>re.test(h)&&!(not&&not.test(h)));
   return {
@@ -121,6 +271,7 @@ function pickColumns(headers){
     state:find(/state|region|province/i),
     country:find(/country/i),
     location:find(/location|place|address/i),
+    url:find(/url|link/i),
   };
 }
 function parseDate(s){
@@ -129,114 +280,188 @@ function parseDate(s){
   if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/))) return mk(fixY(+m[3]),+m[1]-1,+m[2]);
   if((m=s.match(/([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/))&&m[1].toLowerCase() in MONTH_IDX) return mk(+m[3],MONTH_IDX[m[1].toLowerCase()],+m[2]);
   if((m=s.match(/(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?,?\s+(\d{4})/))&&m[2].toLowerCase() in MONTH_IDX) return mk(+m[3],MONTH_IDX[m[2].toLowerCase()],+m[1]);
-  if((m=s.match(/^(\d{4})$/))) return {y:+m[1],m:null,d:null,dow:null,key:m[1]+"-00-00"};
   return null;
 }
 function fixY(y){return y<100?(y>50?1900+y:2000+y):y}
-function mk(y,mo,d){const dt=new Date(Date.UTC(y,mo,d));return {y,m:mo,d,dow:dt.getUTCDay(),key:`${y}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}}
-function splitBands(s,header){
+function mk(y,mo,d){const dt=new Date(Date.UTC(y,mo,d));return {y,m:mo,d,dow:dt.getUTCDay(),t:dt.getTime(),key:`${y}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}}
+function splitBands(s){
   s=String(s||"").trim(); if(!s) return [];
   // Concert Archives uses " / " between bands. Never split on commas: "Tyler, The Creator" is one act.
-  const parts=s.split(/\s+\/\s+|\s*[;|\n]\s*/);
-  return [...new Set(parts.map(p=>p.trim()).filter(Boolean))];
+  return [...new Set(s.split(/\s+\/\s+|\s*[;|\n]\s*/).map(p=>p.trim()).filter(Boolean))];
 }
 function normalize(rows,cols){
   return rows.map(r=>{
     const date=parseDate(r[cols.date]);
     let city=(r[cols.city]||"").trim();
     let state=(r[cols.state]||"").trim(), country=(r[cols.country]||"").trim();
-    // A single "Location" column like "San Francisco, CA, United States"
     if(!city&&cols.location){const p=(r[cols.location]||"").split(",").map(x=>x.trim());city=p[0]||"";state=state||p[1]||"";}
-    const bands=splitBands(r[cols.bands],cols.bands);
+    const bands=splitBands(r[cols.bands]);
     const title=(r[cols.title]||"").trim();
-    // Status: Past / Upcoming / Cancelled / Rescheduled. Without a column, future dates count as upcoming.
     let status=(r[cols.status]||"").trim().toLowerCase();
     if(!status) status=date&&date.key>TODAY?"upcoming":"past";
+    const url=(r[cols.url]||"").trim();
     return {date,status,bands:bands.length?bands:(title?[title]:[]),title,venue:(r[cols.venue]||"").trim(),
-      city,place:[city,state||country].filter(Boolean).join(", ")};
+      city,place:[city,state||country].filter(Boolean).join(", "),url:/^https:\/\//.test(url)?url:""};
   }).filter(c=>c.date||c.bands.length);
 }
 
-// ---- Rendering helpers ----
+// ---------- Helpers ----------
 const count=(arr,f)=>{const m=new Map();for(const x of arr)for(const k of [].concat(f(x)))if(k)m.set(k,(m.get(k)||0)+1);return m};
-function vbars(el,labels,values,onClick){
-  const max=Math.max(1,...values);
-  el.innerHTML=`<div class="vbars">${labels.map((l,i)=>`<div class="vbar${onClick?" click":""}" data-i="${i}" title="${esc(l)}: ${values[i]}"><div class="n">${values[i]||""}</div><div class="b" style="height:${values[i]/max*100}%"></div><div class="x">${esc(l)}</div></div>`).join("")}</div>`;
-  if(onClick) el.querySelectorAll(".vbar").forEach(b=>b.onclick=()=>onClick(labels[+b.dataset.i]));
-}
-function hbars(el,map,n=10,onClick){
-  const top=[...map].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,n);
-  if(!top.length){el.innerHTML='<div class="empty">Nothing here yet.</div>';return}
-  const max=top[0][1];
-  el.innerHTML=`<div class="hbars">${top.map(([k,v])=>`<div class="hrow" title="${esc(k)}: ${v}"><span class="name">${onClick?`<a href="#" data-k="${esc(k)}">${esc(k)}</a>`:esc(k)}</span><div class="track"><div class="fill" style="width:${v/max*100}%"></div></div><span class="c">${v}</span></div>`).join("")}</div>`;
-  if(onClick) el.querySelectorAll("a[data-k]").forEach(a=>a.onclick=e=>{e.preventDefault();onClick(a.dataset.k)});
-}
-function fmtDate(d){return !d?"—":d.m==null?String(d.y):`${MONTHS[d.m]} ${d.d}, ${d.y}`}
+const topN=(m,n)=>[...m].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,n);
+const fmtDate=d=>!d?"—":`${MONTHS[d.m]} ${d.d}, ${d.y}`;
+const DAY=864e5;
 
-let ALL=[];
+// Tooltip: any element with data-tip shows it on hover / focus.
+const tip=$("tip");
+document.addEventListener("pointerover",e=>{const t=e.target.closest("[data-tip]");if(!t){tip.classList.remove("on");return}tip.innerHTML=t.dataset.tip;tip.classList.add("on")});
+document.addEventListener("pointermove",e=>{if(!tip.classList.contains("on"))return;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY-h-12;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y<8)y=e.clientY+18;tip.style.left=x+"px";tip.style.top=y+"px"});
+document.addEventListener("scroll",()=>tip.classList.remove("on"),{passive:true});
+
+// ---------- State ----------
+let ALL=[], YEAR="", Q="", SHOWN=40;
+const setYear=y=>{YEAR=YEAR===y?"":y;SHOWN=40;render()};
+const setQuery=q=>{Q=q;$("q").value=q;SHOWN=40;render();$("list").scrollIntoView({behavior:"smooth",block:"start"})};
+
 function render(){
-  const yr=$("year").value, q=$("q").value.trim().toLowerCase();
-  const matches=ALL.filter(c=>(!yr||(c.date&&String(c.date.y)===yr))&&(!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q)));
-  const list=matches.filter(attended); // stats only count shows you actually went to
-  const upcoming=ALL.filter(c=>c.status==="upcoming").sort((a,b)=>(a.date?.key||"").localeCompare(b.date?.key||""));
-  $("upcoming").innerHTML=upcoming.length?`<div class="card" style="margin-bottom:16px"><h2>Coming up</h2>${upcoming.map(c=>`<div style="margin:4px 0"><b>${fmtDate(c.date)}</b> · ${c.bands.map(b=>`<span class="tag">${esc(b)}</span>`).join("")} <span class="sub">${esc([c.venue,c.place].filter(Boolean).join(", "))}</span></div>`).join("")}</div>`:"";
+  const q=Q.trim().toLowerCase();
+  const inYear=c=>!YEAR||(c.date&&String(c.date.y)===YEAR);
+  const inQuery=c=>!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q);
+  const went=ALL.filter(attended);
+  const list=went.filter(c=>inYear(c)&&inQuery(c));
+  const dated=list.filter(c=>c.date).sort((a,b)=>a.date.t-b.date.t);
   const artists=count(list,c=>c.bands), venues=count(list,c=>c.venue), cities=count(list,c=>c.place);
-  const dated=list.filter(c=>c.date).sort((a,b)=>a.date.key.localeCompare(b.date.key));
-  const years=count(dated,c=>String(c.date.y));
-  const topYear=[...years].sort((a,b)=>b[1]-a[1])[0];
-  const topArtist=[...artists].sort((a,b)=>b[1]-a[1])[0];
-  const kpi=(l,v,s="")=>`<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${esc(s)}</div></div>`;
-  $("kpis").innerHTML=
-    kpi("Shows",list.length,dated.length?`${fmtDate(dated[0].date)} → ${fmtDate(dated.at(-1).date)}`:"")+
-    kpi("Artists",artists.size,topArtist?`Most seen: ${topArtist[0]} (${topArtist[1]}×)`:"")+
-    kpi("Venues",venues.size)+
-    kpi("Cities",cities.size)+
-    kpi("Busiest year",topYear?topYear[0]:"—",topYear?`${topYear[1]} shows`:"");
 
-  // Shows per year — always use full timeline so gaps show as zero
-  const allYears=ALL.filter(c=>c.date&&attended(c)).map(c=>c.date.y);
-  if(allYears.length){
-    const lo=Math.min(...allYears),hi=Math.max(...allYears),ys=[];for(let y=lo;y<=hi;y++)ys.push(String(y));
-    vbars($("byYear"),ys,ys.map(y=>years.get(y)||0),y=>{$("year").value=$("year").value===y?"":y;render()});
-  } else $("byYear").innerHTML='<div class="empty">No dates found.</div>';
-  const withM=dated.filter(c=>c.date.m!=null);
-  vbars($("byMonth"),MONTHS,MONTHS.map((_,i)=>withM.filter(c=>c.date.m===i).length));
-  vbars($("byDow"),DOWS,DOWS.map((_,i)=>withM.filter(c=>c.date.dow===i).length));
-  const searchFor=k=>{$("q").value=k;render()};
-  hbars($("topArtists"),artists,10,searchFor);
-  hbars($("topVenues"),venues,10,searchFor);
-  hbars($("topCities"),cities,10,searchFor);
+  // Hero
+  $("eyebrow").textContent=YEAR?`${YEAR} in review`:"Concert archive";
+  $("heroNum").textContent=list.length;
+  $("heroSub").textContent=YEAR?(list.length===1?"show this year":"shows this year"):(list.length===1?"show and counting":"shows and counting");
+  $("heroRange").textContent=dated.length?`${fmtDate(dated[0].date)} — ${fmtDate(dated.at(-1).date)}`:"";
+  const repeat=[...artists.values()].filter(v=>v>1).length;
+  $("chips").innerHTML=[[artists.size,"artists"],[venues.size,"venues"],[cities.size,"cities"],[repeat,"seen 2+ times"]]
+    .map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  const upcoming=ALL.filter(c=>c.status==="upcoming").sort((a,b)=>(a.date?.t||0)-(b.date?.t||0));
+  $("tickets").innerHTML=upcoming.map(c=>`<div class="ticket"><div class="stub"><div class="m">${c.date?MONTHS[c.date.m]:""}</div><div class="d">${c.date?c.date.d:"?"}</div></div><div class="info"><div class="tag-up">${c.date&&c.date.key===TODAY?"Tonight":"Coming up"}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></div>`).join("");
 
-  const skipped=matches.length-list.length;
-  $("listTitle").textContent=`${yr||q?"Matching":"All"} shows (${list.length}${skipped?` + ${skipped} upcoming/cancelled`:""})`;
-  $("rows").innerHTML=[...matches].sort((a,b)=>(b.date?.key||"").localeCompare(a.date?.key||"")).map(c=>
-    `<tr${attended(c)?"":' class="off"'}><td class="d">${fmtDate(c.date)}${attended(c)?"":`<div class="status">${esc(c.status)}</div>`}</td><td>${c.title&&!c.bands.includes(c.title)?`<div class="sub">${esc(c.title)}</div>`:""}${c.bands.map(b=>`<span class="tag">${esc(b)}</span>`).join("")}</td><td>${esc(c.venue)}</td><td class="hide-sm">${esc(c.place)}</td></tr>`
-  ).join("")||'<tr><td colspan="4" class="empty">No shows match.</td></tr>';
+  // Year pills
+  const yearsAll=[...new Set(went.filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>a-b);
+  $("years").innerHTML=[`<button class="pill" aria-pressed="${!YEAR}" data-y="">All time</button>`,...[...yearsAll].reverse().map(y=>`<button class="pill" aria-pressed="${YEAR===String(y)}" data-y="${y}">${y}</button>`)].join("");
+  $("years").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{YEAR=b.dataset.y;SHOWN=40;render()});
+
+  // Active filter note
+  const note=$("note");
+  if(q){note.hidden=false;note.innerHTML=`Showing results for “${esc(Q)}”<button id="clr">Clear search</button>`;$("clr").onclick=()=>setQuery("")}else note.hidden=true;
+
+  // Year columns (search applies, year selection highlights)
+  const byYear=count(went.filter(inQuery).filter(c=>c.date),c=>String(c.date.y));
+  const ymax=Math.max(1,...byYear.values());
+  const cols=$("yearCols"); cols.classList.toggle("has-sel",!!YEAR);
+  if(yearsAll.length){
+    const ys=[];for(let y=yearsAll[0];y<=yearsAll.at(-1);y++)ys.push(String(y));
+    cols.innerHTML=ys.map(y=>{const n=byYear.get(y)||0;return `<div class="col${YEAR===y?" sel":""}" data-y="${y}" role="button" tabindex="0" aria-label="${y}: ${plural(n,"show")}" data-tip="<b>${y}</b><br>${plural(n,"show")}${y===TODAY.slice(0,4)?" so far":""}"><div class="v num">${n||""}</div><div class="b" style="height:${n/ymax*100}%"></div><div class="x">${y}</div></div>`}).join("");
+    cols.querySelectorAll(".col").forEach(c=>{c.onclick=()=>setYear(c.dataset.y);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setYear(c.dataset.y)}}});
+  } else cols.innerHTML='<div class="empty">No dated shows.</div>';
+
+  renderFacts(list,dated);
+  renderHeat(went.filter(inQuery),yearsAll);
+  renderDow(dated);
+  rank($("topArtists"),artists,"artist");
+  rank($("topVenues"),venues,"venue");
+  rank($("topCities"),cities,"city");
+  renderList(ALL.filter(c=>inYear(c)&&inQuery(c)),list.length);
+}
+
+function renderFacts(list,dated){
+  const facts=[];
+  if(dated.length){
+    const byMonth=topN(count(dated,c=>`${c.date.y}-${c.date.m}`),1)[0];
+    const [by,bm]=byMonth[0].split("-").map(Number);
+    facts.push(["Busiest month",`${MONTHS_LONG[bm]} ${by}`,`${plural(byMonth[1],"show")}`]);
+    let gap=0,from=null,to=null;
+    for(let i=1;i<dated.length;i++){const g=dated[i].date.t-dated[i-1].date.t;if(g>gap){gap=g;from=dated[i-1];to=dated[i]}}
+    if(gap) facts.push(["Longest break",`${Math.round(gap/DAY)} days`,`${fmtDate(from.date)} → ${fmtDate(to.date)}`]);
+    const byDay=topN(count(dated,c=>c.date.key),1)[0];
+    if(byDay&&byDay[1]>1){const d=dated.find(c=>c.date.key===byDay[0]).date;facts.push(["Biggest day",`${byDay[1]} shows`,`on ${fmtDate(d)}`])}
+    else{const first=dated[0];facts.push(["First show",esc(first.bands[0]||first.title),fmtDate(first.date)])}
+    const big=[...list].sort((a,b)=>b.bands.length-a.bands.length)[0];
+    if(big&&big.bands.length>2) facts.push(["Biggest lineup",`${big.bands.length} acts`,`${esc(big.title||big.bands[0])} · ${fmtDate(big.date)}`]);
+  }
+  $("facts").innerHTML=facts.map(([k,v,s])=>`<div class="fact"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+}
+
+function renderHeat(rows,yearsAll){
+  if(!yearsAll.length){$("heat").innerHTML='<div class="empty">No dated shows.</div>';return}
+  const m=count(rows.filter(c=>c.date),c=>`${c.date.y}-${c.date.m}`);
+  const max=Math.max(1,...m.values());
+  const lvl=n=>!n?0:Math.min(5,Math.ceil(n/max*5));
+  let h=`<div class="heat"><div></div>${MONTHS.map(x=>`<div class="ml">${x[0]}</div>`).join("")}`;
+  for(const y of [...yearsAll].reverse()){
+    h+=`<div class="yl" style="${YEAR&&YEAR!=String(y)?"opacity:.4":""}">${y}</div>`;
+    for(let i=0;i<12;i++){const n=m.get(`${y}-${i}`)||0;
+      h+=`<div class="c" style="background:var(--heat-${lvl(n)})${YEAR&&YEAR!=String(y)?";opacity:.35":""}" ${n?`data-n="${n}"`:""} data-tip="<b>${MONTHS_LONG[i]} ${y}</b><br>${plural(n,"show")}"></div>`}
+  }
+  h+=`</div><div class="legend">Fewer ${[0,1,2,3,4,5].map(i=>`<i style="background:var(--heat-${i})"></i>`).join("")} More</div>`;
+  $("heat").innerHTML=h;
+}
+
+function renderDow(dated){
+  const c=DOWS.map((_,i)=>dated.filter(x=>x.date.dow===i).length);
+  const max=Math.max(1,...c), best=c.indexOf(Math.max(...c));
+  // Week starts Monday for readability
+  const order=[1,2,3,4,5,6,0];
+  $("dow").innerHTML=order.map(i=>`<div class="dow-row${i===best&&c[i]?" top":""}" data-tip="<b>${DOWS_LONG[i]}</b><br>${plural(c[i],"show")} · ${dated.length?Math.round(c[i]/dated.length*100):0}%"><span>${DOWS[i]}</span><div class="track"><div class="fill" style="width:${c[i]/max*100}%"></div></div><span class="n num">${c[i]}</span></div>`).join("")
+    +(dated.length?`<p class="hint" style="margin:10px 0 0">${DOWS_LONG[best]} win, with ${Math.round(c[best]/dated.length*100)}% of your shows.</p>`:"");
+}
+
+function rank(el,map,kind){
+  const t=topN(map,10);
+  if(!t.length){el.innerHTML='<li class="empty">Nothing here yet.</li>';return}
+  const max=t[0][1];
+  el.innerHTML=t.map(([k,v],i)=>`<li data-k="${esc(k)}" tabindex="0" title="${esc(k)}"><span class="i">${i+1}</span><span class="av ${kind}">${esc(initials(k))}</span><span class="nm"><b>${esc(k)}</b><span class="mini"><i style="width:${v/max*100}%"></i></span></span><span class="ct num">${v}<small>×</small></span></li>`).join("");
+  el.querySelectorAll("li[data-k]").forEach(li=>{li.onclick=()=>setQuery(li.dataset.k);li.onkeydown=e=>{if(e.key==="Enter")setQuery(li.dataset.k)}});
+}
+
+function renderList(rows,attendedCount){
+  rows=[...rows].sort((a,b)=>(b.date?.t||0)-(a.date?.t||0));
+  $("listTitle").textContent=Q?"Matching shows":YEAR?`Every show in ${YEAR}`:"Every show";
+  const other=rows.length-attendedCount;
+  $("listCount").textContent=`${plural(attendedCount,"show")}${other?` · ${other} upcoming or cancelled`:""}`;
+  const shown=rows.slice(0,SHOWN);
+  let h="",cur="";
+  for(const c of shown){
+    const g=c.date?`${MONTHS_LONG[c.date.m]} ${c.date.y}`:"Undated";
+    if(g!==cur){if(cur)h+="</div>";h+=`<div class="month"><h3>${g}</h3>`;cur=g}
+    const tag=c.url?"a":"div", href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:"";
+    const tour=c.title&&!c.bands.includes(c.title)?`<div class="tour">${esc(c.title)}</div>`:"";
+    const up=c.status==="upcoming";
+    h+=`<${tag} class="show${up?" up":attended(c)?"":" off"}"${href}><div class="date"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></div><div>${tour}<div class="acts">${c.bands.map(esc).join('<span class="sep">/</span>')}</div><div class="where">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}</div></${tag}>`;
+  }
+  if(cur)h+="</div>";
+  $("list").innerHTML=h||'<div class="empty">No shows match.</div>';
+  const more=$("more");
+  more.hidden=rows.length<=SHOWN;
+  more.textContent=`Show more (${rows.length-SHOWN} left)`;
+  more.onclick=()=>{SHOWN+=80;renderList(rows,attendedCount)};
 }
 
 async function load(){
-  // Your real export wins (CSV or Excel); otherwise fall back to the sample.
-  let src=null, text=null;
+  let src=null,text=null;
   for(const f of ["data/concerts.csv","data/concerts.xlsx","data/sample.csv"]){
     try{const r=await fetch(f,{cache:"no-store"});if(!r.ok)continue;src=f;
-      if(f.endsWith(".xlsx")){const wb=XLSX.read(await r.arrayBuffer(),{type:"array",cellDates:false,raw:false});text=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]],{rawNumbers:false})}
+      if(f.endsWith(".xlsx")){const wb=XLSX.read(await r.arrayBuffer(),{type:"array"});text=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]])}
       else text=await r.text();
       break}catch(e){}
   }
-  if(text==null){$("sub").textContent="No data file found. Add data/concerts.csv.";return}
-  const parsed=Papa.parse(text.replace(/^\uFEFF/,""),{header:true,skipEmptyLines:true});
+  if(text==null){$("heroSub").textContent="No data yet. Add data/concerts.csv";return}
+  const parsed=Papa.parse(text.replace(/^﻿/,""),{header:true,skipEmptyLines:true});
   const cols=pickColumns(parsed.meta.fields||[]);
   ALL=normalize(parsed.data,cols);
-  if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">👋 Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code> to see your real shows.</div>';
-  const ys=[...new Set(ALL.filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>b-a);
-  $("year").insertAdjacentHTML("beforeend",ys.map(y=>`<option>${y}</option>`).join(""));
-  $("sub").textContent=`${ALL.filter(attended).length} shows · source: ${src}`;
-  const missing=Object.entries(cols).filter(([k,v])=>!v&&["date","bands","venue"].includes(k)).map(([k])=>k);
-  $("foot").innerHTML=`Detected columns: ${Object.entries(cols).filter(([,v])=>v).map(([k,v])=>`${k} → “${esc(v)}”`).join(", ")}${missing.length?` · <b>Couldn’t find: ${missing.join(", ")}</b>`:""}`;
-  $("year").onchange=render; $("q").oninput=render;
+  if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code>.</div>';
+  const missing=["date","bands","venue"].filter(k=>!cols[k]);
+  $("foot").innerHTML=`Data: ${esc(src)} · columns: ${Object.entries(cols).filter(([,v])=>v).map(([k,v])=>`${k} → “${esc(v)}”`).join(", ")}${missing.length?` · <b>missing: ${missing.join(", ")}</b>`:""}`;
+  let t;$("q").oninput=e=>{clearTimeout(t);t=setTimeout(()=>{Q=e.target.value;SHOWN=40;render()},120)};
   render();
 }
-load();
+load().catch(e=>console.error("load failed",e.stack));
 </script>
 </body>
 </html>
