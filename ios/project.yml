@@ -1,0 +1,33 @@
+# XcodeGen spec. Generate the Xcode project with:  cd ios && xcodegen
+name: Concerts
+options:
+  bundleIdPrefix: com.sanchitcop19
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  Concerts:
+    type: application
+    platform: iOS
+    sources:
+      - Concerts
+    info:
+      path: Concerts/Info.plist
+      properties:
+        CFBundleDisplayName: Concerts
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        UIViewControllerBasedStatusBarAppearance: false
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.sanchitcop19.concerts
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        # Pick your team in Xcode (Signing & Capabilities), or put your Team ID here.
+        DEVELOPMENT_TEAM: ""

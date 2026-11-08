@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0a10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Concerts">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-32.png">
 <title>Sanchit's Concert Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +23,7 @@
   --bg:#f4f2ee;--surface:#fcfcfb;--surface-2:#f0eee9;--line:#e4e1da;
   --ink:#0f0e12;--ink-2:#4d4a55;--ink-3:#8a8691;
   --accent:#6250d6;--accent-ink:#4a3bb3;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s-other:#c4c1ba;
   --heat-0:#ece9f7;--heat-1:#cdc5f4;--heat-2:#a597ec;--heat-3:#7d6ae0;--heat-4:#5541c9;--heat-5:#3a2a96;
   --shadow:0 1px 2px rgba(20,16,40,.04),0 8px 24px rgba(20,16,40,.06);
 }
@@ -24,12 +33,14 @@
     --bg:#0e0d12;--surface:#17161c;--surface-2:#1f1e26;--line:#2a2833;
     --ink:#f2f0f7;--ink-2:#bdb8c9;--ink-3:#837e8f;
     --accent:#9085e9;--accent-ink:#b4abf2;
+    --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s-other:#4a4754;
     --heat-0:#221f2e;--heat-1:#342c5e;--heat-2:#4b3d93;--heat-3:#6754c4;--heat-4:#8a79e6;--heat-5:#b9adf7;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s-other:#4a4754;
   --bg:#0e0d12;--surface:#17161c;--surface-2:#1f1e26;--line:#2a2833;
   --ink:#f2f0f7;--ink-2:#bdb8c9;--ink-3:#837e8f;
   --accent:#9085e9;--accent-ink:#b4abf2;
@@ -45,7 +56,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-u
 a{color:inherit}
 
 /* ---------- Hero: a gig poster. Dark in both themes on purpose. ---------- */
-.hero{position:relative;overflow:hidden;color:#fff;background:#0b0a10;padding:56px 0 40px;isolation:isolate}
+.hero{position:relative;overflow:hidden;color:#fff;background:#0b0a10;padding:calc(56px + env(safe-area-inset-top)) 0 40px;isolation:isolate}
+.wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
 .hero::before{content:"";position:absolute;inset:-40% -10% auto -10%;height:140%;z-index:-1;
   background:radial-gradient(40% 50% at 18% 30%,rgba(124,92,255,.55),transparent 70%),
              radial-gradient(35% 45% at 82% 20%,rgba(255,77,141,.42),transparent 70%),
@@ -63,7 +75,9 @@ a{color:inherit}
   border-radius:14px;padding:12px 16px;min-width:120px}
 .chip b{display:block;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
 .chip span{font-size:12px;color:rgba(255,255,255,.62);text-transform:uppercase;letter-spacing:.08em}
-.tickets{display:flex;gap:12px;margin-top:28px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.next-up{margin-top:32px}
+.next-count{letter-spacing:.04em;text-transform:none;font-weight:500;color:rgba(255,255,255,.5);margin-left:6px}
+.tickets{display:flex;gap:12px;margin-top:12px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .ticket{flex:0 0 auto;display:flex;align-items:stretch;background:#fff;color:#0f0e12;border-radius:12px;min-width:260px;max-width:340px;position:relative}
 .ticket .stub{padding:12px 14px;border-right:2px dashed #d9d5e8;text-align:center;min-width:72px}
 .ticket .stub .m{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#6250d6;font-weight:700}
@@ -76,7 +90,7 @@ a{color:inherit}
 .ticket::before{top:-7px}.ticket::after{bottom:-7px}
 
 /* ---------- Sticky filter bar ---------- */
-.bar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{position:sticky;top:0;z-index:20;padding-top:env(safe-area-inset-top);background:linear-gradient(#0b0a10 env(safe-area-inset-top),color-mix(in srgb,var(--bg) 82%,transparent) env(safe-area-inset-top));backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .bar .wrap{display:flex;gap:10px;align-items:center;padding-top:10px;padding-bottom:10px}
 .years{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 .years::-webkit-scrollbar,.tickets::-webkit-scrollbar{display:none}
@@ -95,22 +109,53 @@ main{padding:24px 0 72px}
 .grid{display:grid;gap:16px;margin-top:16px}
 .g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g-2{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
-@media (max-width:860px){.g-3,.g-2{grid-template-columns:minmax(0,1fr)}}
+.g-2e{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:860px){.g-3,.g-2,.g-2e{grid-template-columns:minmax(0,1fr)}}
+/* Detail pages: the name is the headline, no filter bar */
+.back{display:inline-flex;align-items:center;gap:4px;color:rgba(255,255,255,.8);text-decoration:none;font-weight:600;font-size:14px;margin:-8px 0 18px -4px;padding:6px 10px 6px 4px;border-radius:999px}
+.back:hover{background:rgba(255,255,255,.1);color:#fff}
+body.detail .bar{display:none}
+body.detail .hero h1{font-size:clamp(40px,8vw,96px);line-height:.95;letter-spacing:-.035em;overflow-wrap:anywhere}
+body.detail .hero h1 small{font-size:clamp(18px,3vw,26px);color:rgba(255,255,255,.72);margin-top:14px;font-weight:600}
+.range a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+a.ticket{text-decoration:none}
+.lnk{color:inherit;text-decoration:none;border-radius:4px}
+.lnk:hover{color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px}
+.ext{display:grid;place-items:center;width:32px;height:32px;border-radius:999px;color:var(--ink-3);text-decoration:none}
+.ext:hover{background:var(--surface-2);color:var(--ink)}
+.badge-wrap{display:flex;align-items:center;gap:8px}
+/* Donut */
+.donut-wrap{position:relative;width:min(220px,100%);margin:4px auto 14px}
+.donut-wrap svg{display:block;width:100%;height:auto}
+.donut-wrap path,.donut-wrap circle{cursor:pointer;transition:opacity .15s}
+.donut-wrap:hover path:not(:hover){opacity:.45}
+.donut-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.donut-mid b{font:800 34px/1 "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.03em}
+.donut-mid span{font-size:12px;color:var(--ink-3);margin-top:4px;max-width:110px}
+.legend-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.legend-list li{display:grid;grid-template-columns:12px minmax(0,1fr) auto 42px;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;font-size:14px}
+.legend-list li[data-k]{cursor:pointer}
+.legend-list li[data-k]:hover{background:var(--surface-2)}
+.legend-list .sw{width:12px;height:12px;border-radius:3px}
+.legend-list .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-list .ct{font-weight:700;text-align:right}
+.legend-list .pc{color:var(--ink-3);text-align:right;font-size:13px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0}
 .card h2{margin:0 0 4px;font:700 18px "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.01em}
 .card .hint{margin:0 0 16px;color:var(--ink-3);font-size:13px}
 
 /* Year columns */
-.cols{display:flex;align-items:flex-end;gap:6px;height:200px;padding-top:22px}
-.col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;position:relative}
-.col .b{width:100%;max-width:56px;background:var(--heat-3);border-radius:4px 4px 0 0;min-height:2px;transition:background .15s,opacity .15s}
-.col .v{font-size:12px;color:var(--ink-2);margin-bottom:6px;font-weight:600}
-.col .x{font-size:12px;color:var(--ink-3);margin-top:8px}
+/* Bars are sized against .area only (not the labels), so 82 vs 61 shows its true difference. */
+.cols{display:flex;height:220px}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;cursor:pointer}
+.col .area{flex:1;position:relative;border-bottom:1px solid var(--line);margin-top:24px}
+.col .b{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:calc(100% - 8px);max-width:56px;background:var(--heat-3);border-radius:4px 4px 0 0;min-height:2px;transition:background .15s,opacity .15s}
+.col .v{position:absolute;left:0;right:0;text-align:center;font-size:12px;color:var(--ink-2);font-weight:600;transform:translateY(-6px)}
+.col .x{font-size:12px;color:var(--ink-3);margin-top:8px;text-align:center}
 .col:hover .b{background:var(--heat-4)}
 .cols.has-sel .col:not(.sel) .b{opacity:.35}
 .col.sel .b{background:var(--accent)}
 .col.sel .x{color:var(--ink);font-weight:600}
-.baseline{height:1px;background:var(--line);margin-top:-27px;margin-bottom:26px}
 
 /* Heatmap: years × months */
 .heat{display:grid;grid-template-columns:44px repeat(12,minmax(0,1fr));gap:3px;font-size:11px;color:var(--ink-3)}
@@ -138,12 +183,9 @@ main{padding:24px 0 72px}
 
 /* Leaderboards */
 .rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
-.rank li{display:grid;grid-template-columns:22px 34px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;cursor:pointer}
+.rank li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;margin:0 -8px;border-radius:10px;cursor:pointer}
 .rank li:hover{background:var(--surface-2)}
 .rank .i{color:var(--ink-3);font-size:12px;font-weight:600;text-align:right}
-.rank .av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font:700 13px "Bricolage Grotesque",sans-serif;color:#fff;background:linear-gradient(135deg,#7c5cff,#ff4d8d)}
-.rank .av.venue{background:linear-gradient(135deg,#2a78d6,#7c5cff)}
-.rank .av.city{background:linear-gradient(135deg,#ff8a3d,#ff4d8d)}
 .rank .nm{min-width:0}
 .rank .nm b{display:block;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rank .nm .mini{height:4px;border-radius:2px;background:var(--surface-2);margin-top:5px;overflow:hidden}
@@ -159,7 +201,7 @@ main{padding:24px 0 72px}
 .month{margin-top:22px}
 .month h3{margin:0 0 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .show{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:8px;text-decoration:none;transition:border-color .15s,transform .15s}
-a.show:hover{border-color:var(--accent);transform:translateY(-1px)}
+.show:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
 .show .date{text-align:center;border-right:1px dashed var(--line);padding-right:14px}
 .show .date .d{font:800 24px/1 "Bricolage Grotesque",sans-serif}
 .show .date .w{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
@@ -174,7 +216,7 @@ a.show:hover{border-color:var(--accent);transform:translateY(-1px)}
 .badge.up{background:var(--accent);color:#fff}
 .more{display:block;margin:20px auto 0;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 20px;font:600 14px Inter,sans-serif;cursor:pointer}
 .more:hover{border-color:var(--accent)}
-@media (max-width:600px){.bar .wrap{flex-wrap:wrap}.years{flex-basis:100%;order:2}.search{flex:1 1 100%}.show{grid-template-columns:48px minmax(0,1fr)}.show .badge-wrap{display:none}.cols{height:160px}.col .v{font-size:10px}.col .x{font-size:10px}}
+@media (max-width:600px){.chips{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr))}.chip{min-width:0;padding:12px 14px}.bar .wrap{flex-wrap:wrap}.years{flex-basis:100%;order:2}.search{flex:1 1 100%}.show{grid-template-columns:48px minmax(0,1fr) auto}.badge-wrap .badge{display:none}.cols{height:180px}.col .v{font-size:10px}.col .x{font-size:10px}}
 
 /* Tooltip */
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.35;max-width:240px;opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;box-shadow:0 8px 24px rgba(0,0,0,.2)}
@@ -187,11 +229,14 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
 <body>
 <header class="hero">
   <div class="wrap">
+    <a class="back" id="back" href="#" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Back</a>
     <div class="eyebrow" id="eyebrow">Concert archive</div>
     <h1 class="display"><span id="heroNum" class="num">—</span><small id="heroSub">shows and counting</small></h1>
     <div class="range" id="heroRange"></div>
     <div class="chips" id="chips"></div>
-    <div class="tickets" id="tickets"></div>
+    <div class="next-up" id="nextUp" hidden><div class="eyebrow">Next 2 weeks <span id="nextUpCount" class="next-count"></span></div>
+    <div class="tickets" id="tickets"></div></div>
   </div>
 </header>
 
@@ -209,11 +254,11 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
   <div id="banner"></div>
   <p class="filter-note" id="note" hidden></p>
 
+  <div id="dash">
   <section class="card">
     <h2>Shows per year</h2>
     <p class="hint">Tap a year to see that year in review.</p>
     <div class="cols" id="yearCols"></div>
-    <div class="baseline"></div>
   </section>
 
   <section class="facts" id="facts"></section>
@@ -232,10 +277,24 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
   </section>
 
   <section class="grid g-3">
-    <div class="card"><h2>Most-seen artists</h2><p class="hint">Tap to see every show.</p><ol class="rank" id="topArtists"></ol></div>
+    <div class="card"><h2>Most-seen artists</h2><p class="hint">Tap one to open its page.</p><ol class="rank" id="topArtists"></ol></div>
     <div class="card"><h2>Home venues</h2><p class="hint">Where you keep ending up.</p><ol class="rank" id="topVenues"></ol></div>
-    <div class="card"><h2>Cities</h2><p class="hint">Shows by city.</p><ol class="rank" id="topCities"></ol></div>
+    <div class="card"><h2>Cities</h2><p class="hint">Share of your shows by city.</p><div id="cityDonut"></div></div>
   </section>
+  </div>
+
+  <!-- Artist / venue / city page -->
+  <div id="detail" hidden>
+    <section class="card">
+      <h2>Shows per year</h2>
+      <p class="hint" id="dYearHint"></p>
+      <div class="cols" id="dYearCols"></div>
+    </section>
+    <section class="grid g-2e">
+      <div class="card"><h2 id="dATitle"></h2><p class="hint" id="dAHint"></p><ol class="rank" id="dA"></ol></div>
+      <div class="card"><h2 id="dBTitle"></h2><p class="hint" id="dBHint"></p><ol class="rank" id="dB"></ol></div>
+    </section>
+  </div>
 
   <div class="list-head"><h2 id="listTitle">Every show</h2><span id="listCount"></span></div>
   <div id="list"></div>
@@ -252,11 +311,21 @@ const DOWS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const DOWS_LONG=["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
 const MONTH_IDX=Object.fromEntries(MONTHS_LONG.map((m,i)=>[m.slice(0,3).toLowerCase(),i]));
 const $=id=>document.getElementById(id);
-const TODAY=new Date().toISOString().slice(0,10);
+// Today's date in the viewer's own timezone (toISOString would use UTC and flip early in the evening).
+const localKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const TODAY=localKey(new Date());
+const IN_2_WEEKS=localKey(new Date(Date.now()+14*864e5));
+const daysUntil=key=>Math.round((Date.UTC(...key.split("-").map((v,i)=>i===1?v-1:+v))-Date.UTC(...TODAY.split("-").map((v,i)=>i===1?v-1:+v)))/864e5);
+function whenLabel(key){
+  const n=daysUntil(key);
+  if(n===0) return "Tonight";
+  if(n===1) return "Tomorrow";
+  if(n<7) return `This ${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date(key+"T12:00").getDay()]}`;
+  return `In ${n} days`;
+}
 const attended=c=>c.status==="past"||c.status==="";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
-const initials=s=>s.replace(/^the\s+/i,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 
 // ---------- Reading the export (column names are detected, not hard-coded) ----------
 function pickColumns(headers){
@@ -322,7 +391,106 @@ let ALL=[], YEAR="", Q="", SHOWN=40;
 const setYear=y=>{YEAR=YEAR===y?"":y;SHOWN=40;render()};
 const setQuery=q=>{Q=q;$("q").value=q;SHOWN=40;render();$("list").scrollIntoView({behavior:"smooth",block:"start"})};
 
+// ---------- Pages: #/artist/<name>, #/venue/<name>, #/city/<name> ----------
+const KINDS={artist:{label:"Artist",match:(c,n)=>c.bands.includes(n)},
+             venue:{label:"Venue",match:(c,n)=>c.venue===n},
+             city:{label:"City",match:(c,n)=>c.place===n}};
+const hrefFor=(kind,name)=>`#/${kind}/${encodeURIComponent(name)}`;
+const link=(kind,name)=>`<a class="lnk" href="${hrefFor(kind,name)}">${esc(name)}</a>`;
+function route(){
+  const m=location.hash.match(/^#\/(artist|venue|city)\/(.+)$/);
+  return m?{kind:m[1],name:decodeURIComponent(m[2])}:null;
+}
+// Remember scroll position per page so Back returns you where you were.
+const scrollMemo=new Map(); let lastHash=location.hash, navigatedInApp=false;
+history.scrollRestoration="manual";
+addEventListener("hashchange",()=>{
+  scrollMemo.set(lastHash,scrollY); lastHash=location.hash; navigatedInApp=true; SHOWN=40;
+  render(); scrollTo(0,scrollMemo.get(location.hash)||0);
+});
+$("back").onclick=e=>{e.preventDefault(); navigatedInApp?history.back():(location.hash="")};
+
 function render(){
+  const r=route();
+  document.body.classList.toggle("detail",!!r);
+  $("dash").hidden=!!r; $("detail").hidden=!r; $("back").hidden=!r;
+  if(r) return renderDetail(r);
+  renderDash();
+}
+
+function renderTickets(rows){
+  // Every upcoming show in the next 14 days, soonest first.
+  const upcoming=rows.filter(c=>c.status==="upcoming"&&c.date&&c.date.key>=TODAY&&c.date.key<=IN_2_WEEKS).sort((a,b)=>a.date.t-b.date.t);
+  const later=rows.filter(c=>c.status==="upcoming"&&c.date&&c.date.key>IN_2_WEEKS).length;
+  $("nextUp").hidden=!upcoming.length;
+  $("nextUpCount").textContent=`${plural(upcoming.length,"show")}${later?` · ${later} more after that`:""}`;
+  $("tickets").innerHTML=upcoming.map(c=>`<a class="ticket" href="${hrefFor("artist",c.bands[0]||"")}"><div class="stub"><div class="m">${MONTHS[c.date.m]}</div><div class="d">${c.date.d}</div></div><div class="info"><div class="tag-up">${whenLabel(c.date.key)}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></a>`).join("");
+}
+
+function renderYearCols(el,rows,yearsAll,clickable){
+  const byYear=count(rows.filter(c=>c.date),c=>String(c.date.y));
+  const ymax=Math.max(1,...byYear.values());
+  el.classList.toggle("has-sel",clickable&&!!YEAR);
+  if(!yearsAll.length){el.innerHTML='<div class="empty">No dated shows.</div>';return}
+  const ys=[];for(let y=yearsAll[0];y<=yearsAll.at(-1);y++)ys.push(String(y));
+  el.innerHTML=ys.map(y=>{const n=byYear.get(y)||0;return `<div class="col${clickable&&YEAR===y?" sel":""}" data-y="${y}" ${clickable?'role="button" tabindex="0"':'style="cursor:default"'} aria-label="${y}: ${plural(n,"show")}" data-tip="<b>${y}</b><br>${plural(n,"show")}${y===TODAY.slice(0,4)?" so far":""}"><div class="area"><div class="b" style="height:${n/ymax*100}%${n?"":";min-height:0"}"></div><div class="v num" style="bottom:${n/ymax*100}%">${n||""}</div></div><div class="x">${y}</div></div>`}).join("");
+  if(clickable) el.querySelectorAll(".col").forEach(c=>{c.onclick=()=>setYear(c.dataset.y);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setYear(c.dataset.y)}}});
+}
+
+function renderDetail({kind,name}){
+  const K=KINDS[kind];
+  const all=ALL.filter(c=>K.match(c,name));
+  const went=all.filter(attended);
+  const dated=went.filter(c=>c.date).sort((a,b)=>a.date.t-b.date.t);
+  const n=went.length;
+  document.title=`${name} · Concert Archive`;
+  $("eyebrow").textContent=K.label;
+  $("heroNum").textContent=name;
+  $("heroSub").textContent=kind==="artist"?(n===1?"Seen once":`Seen ${n} times`):kind==="venue"?(n===1?"1 visit":`${n} visits`):plural(n,"show");
+  // Where it sits in your all-time ranking
+  const key={artist:c=>c.bands,venue:c=>c.venue,city:c=>c.place}[kind];
+  const ranking=topN(count(ALL.filter(attended),key),1e9);
+  const pos=ranking.findIndex(([k])=>k===name)+1;
+
+  let range="";
+  if(kind==="venue"&&all[0]?.place) range+=`${link("city",all[0].place)} · `;
+  range+=dated.length===1?`Once, on ${fmtDate(dated[0].date)}`:dated.length?`First ${fmtDate(dated[0].date)} · Latest ${fmtDate(dated.at(-1).date)}`:"";
+  $("heroRange").innerHTML=range;
+
+  const artists=count(went,c=>c.bands), venues=count(went,c=>c.venue), cities=count(went,c=>c.place), years=new Set(dated.map(c=>c.date.y));
+  const chips=[];
+  if(pos) chips.push([`#${pos}`,`of ${ranking.length} ${kind==="city"?"cities":kind+"s"}`]);
+  if(kind!=="venue") chips.push([venues.size,venues.size===1?"venue":"venues"]);
+  if(kind==="artist") chips.push([cities.size,cities.size===1?"city":"cities"]);
+  else chips.push([artists.size,artists.size===1?"artist":"artists"]);
+  chips.push([years.size,years.size===1?"year":"years"]);
+  $("chips").style.setProperty("--n",chips.length<=3?chips.length:2);
+  $("chips").innerHTML=chips.map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  renderTickets(all);
+
+  const yearsAll=[...new Set(ALL.filter(attended).filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>a-b);
+  $("dYearHint").textContent=years.size?`Seen in ${plural(years.size,"year")} out of ${yearsAll.length}.`:"";
+  renderYearCols($("dYearCols"),went,yearsAll,false);
+
+  const box=(id,title,hint,map,k)=>{$(id+"Title").textContent=title;$(id+"Hint").textContent=hint;rank($(id),map,k)};
+  if(kind==="artist"){
+    const others=count(went,c=>c.bands.filter(b=>b!==name));
+    box("dA","Where you saw them","Venues, most visits first.",venues,"venue");
+    box("dB","Shared the bill with","Other acts on the same lineup.",others,"artist");
+  }else if(kind==="venue"){
+    const city=all[0]?.place;
+    const nearby=count(ALL.filter(attended).filter(c=>c.place===city&&c.venue!==name),c=>c.venue);
+    box("dA","Artists seen here","Most-seen first.",artists,"artist");
+    box("dB",city?`Other venues in ${city.split(",")[0]}`:"Other venues","Where else you go nearby.",nearby,"venue");
+  }else{
+    box("dA","Venues","Where you go in this city.",venues,"venue");
+    box("dB","Artists","Most-seen here.",artists,"artist");
+  }
+  renderList(all,n,kind==="artist"?"Every time you saw them":kind==="venue"?"Every show here":`Every show in ${name.split(",")[0]}`);
+}
+
+function renderDash(){
+  document.title="Sanchit's Concert Archive";
   const q=Q.trim().toLowerCase();
   const inYear=c=>!YEAR||(c.date&&String(c.date.y)===YEAR);
   const inQuery=c=>!q||[c.title,c.venue,c.place,...c.bands].join(" ").toLowerCase().includes(q);
@@ -337,10 +505,10 @@ function render(){
   $("heroSub").textContent=YEAR?(list.length===1?"show this year":"shows this year"):(list.length===1?"show and counting":"shows and counting");
   $("heroRange").textContent=dated.length?`${fmtDate(dated[0].date)} — ${fmtDate(dated.at(-1).date)}`:"";
   const repeat=[...artists.values()].filter(v=>v>1).length;
+  $("chips").style.setProperty("--n",2);
   $("chips").innerHTML=[[artists.size,"artists"],[venues.size,"venues"],[cities.size,"cities"],[repeat,"seen 2+ times"]]
     .map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
-  const upcoming=ALL.filter(c=>c.status==="upcoming").sort((a,b)=>(a.date?.t||0)-(b.date?.t||0));
-  $("tickets").innerHTML=upcoming.map(c=>`<div class="ticket"><div class="stub"><div class="m">${c.date?MONTHS[c.date.m]:""}</div><div class="d">${c.date?c.date.d:"?"}</div></div><div class="info"><div class="tag-up">${c.date&&c.date.key===TODAY?"Tonight":"Coming up"}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></div>`).join("");
+  renderTickets(ALL);
 
   // Year pills
   const yearsAll=[...new Set(went.filter(c=>c.date).map(c=>c.date.y))].sort((a,b)=>a-b);
@@ -352,22 +520,15 @@ function render(){
   if(q){note.hidden=false;note.innerHTML=`Showing results for “${esc(Q)}”<button id="clr">Clear search</button>`;$("clr").onclick=()=>setQuery("")}else note.hidden=true;
 
   // Year columns (search applies, year selection highlights)
-  const byYear=count(went.filter(inQuery).filter(c=>c.date),c=>String(c.date.y));
-  const ymax=Math.max(1,...byYear.values());
-  const cols=$("yearCols"); cols.classList.toggle("has-sel",!!YEAR);
-  if(yearsAll.length){
-    const ys=[];for(let y=yearsAll[0];y<=yearsAll.at(-1);y++)ys.push(String(y));
-    cols.innerHTML=ys.map(y=>{const n=byYear.get(y)||0;return `<div class="col${YEAR===y?" sel":""}" data-y="${y}" role="button" tabindex="0" aria-label="${y}: ${plural(n,"show")}" data-tip="<b>${y}</b><br>${plural(n,"show")}${y===TODAY.slice(0,4)?" so far":""}"><div class="v num">${n||""}</div><div class="b" style="height:${n/ymax*100}%"></div><div class="x">${y}</div></div>`}).join("");
-    cols.querySelectorAll(".col").forEach(c=>{c.onclick=()=>setYear(c.dataset.y);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setYear(c.dataset.y)}}});
-  } else cols.innerHTML='<div class="empty">No dated shows.</div>';
+  renderYearCols($("yearCols"),went.filter(inQuery),yearsAll,true);
 
   renderFacts(list,dated);
   renderHeat(went.filter(inQuery),yearsAll);
   renderDow(dated);
   rank($("topArtists"),artists,"artist");
   rank($("topVenues"),venues,"venue");
-  rank($("topCities"),cities,"city");
-  renderList(ALL.filter(c=>inYear(c)&&inQuery(c)),list.length);
+  renderDonut($("cityDonut"),cities,list.length,"city");
+  renderList(ALL.filter(c=>inYear(c)&&inQuery(c)),list.length,Q?"Matching shows":YEAR?`Every show in ${YEAR}`:"Every show");
 }
 
 function renderFacts(list,dated){
@@ -416,13 +577,40 @@ function rank(el,map,kind){
   const t=topN(map,10);
   if(!t.length){el.innerHTML='<li class="empty">Nothing here yet.</li>';return}
   const max=t[0][1];
-  el.innerHTML=t.map(([k,v],i)=>`<li data-k="${esc(k)}" tabindex="0" title="${esc(k)}"><span class="i">${i+1}</span><span class="av ${kind}">${esc(initials(k))}</span><span class="nm"><b>${esc(k)}</b><span class="mini"><i style="width:${v/max*100}%"></i></span></span><span class="ct num">${v}<small>×</small></span></li>`).join("");
-  el.querySelectorAll("li[data-k]").forEach(li=>{li.onclick=()=>setQuery(li.dataset.k);li.onkeydown=e=>{if(e.key==="Enter")setQuery(li.dataset.k)}});
+  el.innerHTML=t.map(([k,v],i)=>`<li data-k="${esc(k)}" tabindex="0" role="link" title="${esc(k)}"><span class="i">${i+1}</span><span class="nm"><b>${esc(k)}</b><span class="mini"><i style="width:${v/max*100}%"></i></span></span><span class="ct num">${v}<small>×</small></span></li>`).join("");
+  const go=k=>{location.hash=hrefFor(kind,k)};
+  el.querySelectorAll("li[data-k]").forEach(li=>{li.onclick=()=>go(li.dataset.k);li.onkeydown=e=>{if(e.key==="Enter")go(li.dataset.k)}});
 }
 
-function renderList(rows,attendedCount){
+// Part-to-whole: top 4 + "Other". Slices and legend rows open the city page.
+function renderDonut(el,map,total,kind){
+  if(!total){el.innerHTML='<div class="empty">Nothing here yet.</div>';return}
+  const t=topN(map,4), rest=total-t.reduce((a,[,v])=>a+v,0), others=map.size-t.length;
+  const slices=t.map(([k,v],i)=>({k,v,color:`var(--s${i+1})`,link:true}));
+  if(rest>0) slices.push({k:`${others} other ${others===1?"city":"cities"}`,v:rest,color:"var(--s-other)",link:false});
+  const R=96,r=60,C=100,pt=(rad,a)=>[C+rad*Math.sin(a),C-rad*Math.cos(a)];
+  let a0=0,paths="";
+  const pct=v=>Math.round(v/total*100);
+  for(const sl of slices){
+    const tip=`data-tip="<b>${esc(sl.k)}</b><br>${plural(sl.v,"show")} · ${pct(sl.v)}%"`;
+    const data=sl.link?`data-k="${esc(sl.k)}"`:"";
+    if(slices.length===1){paths+=`<circle cx="${C}" cy="${C}" r="${(R+r)/2}" fill="none" stroke="${sl.color}" stroke-width="${R-r}" ${tip} ${data}/>`;break}
+    const a1=a0+sl.v/total*2*Math.PI, big=a1-a0>Math.PI?1:0;
+    const [x0,y0]=pt(R,a0),[x1,y1]=pt(R,a1),[x2,y2]=pt(r,a1),[x3,y3]=pt(r,a0);
+    paths+=`<path d="M${x0} ${y0}A${R} ${R} 0 ${big} 1 ${x1} ${y1}L${x2} ${y2}A${r} ${r} 0 ${big} 0 ${x3} ${y3}Z" fill="${sl.color}" stroke="var(--surface)" stroke-width="2" stroke-linejoin="round" ${tip} ${data}/>`;
+    a0=a1;
+  }
+  const lead=slices[0];
+  el.innerHTML=`<div class="donut-wrap"><svg viewBox="0 0 200 200" role="img" aria-label="Shows by city">${paths}</svg>
+    <div class="donut-mid"><b class="num">${pct(lead.v)}%</b><span>${esc(lead.k.split(",")[0])}</span></div></div>
+    <ul class="legend-list">${slices.map(sl=>`<li ${sl.link?`data-k="${esc(sl.k)}" tabindex="0" role="link"`:""}><i class="sw" style="background:${sl.color}"></i><span class="nm" title="${esc(sl.k)}">${esc(sl.k)}</span><span class="ct num">${sl.v}</span><span class="pc num">${pct(sl.v)}%</span></li>`).join("")}</ul>`;
+  const go=k=>{location.hash=hrefFor(kind,k)};
+  el.querySelectorAll("[data-k]").forEach(n=>{n.onclick=()=>go(n.dataset.k);n.onkeydown=e=>{if(e.key==="Enter")go(n.dataset.k)}});
+}
+
+function renderList(rows,attendedCount,title){
   rows=[...rows].sort((a,b)=>(b.date?.t||0)-(a.date?.t||0));
-  $("listTitle").textContent=Q?"Matching shows":YEAR?`Every show in ${YEAR}`:"Every show";
+  $("listTitle").textContent=title;
   const other=rows.length-attendedCount;
   $("listCount").textContent=`${plural(attendedCount,"show")}${other?` · ${other} upcoming or cancelled`:""}`;
   const shown=rows.slice(0,SHOWN);
@@ -430,17 +618,17 @@ function renderList(rows,attendedCount){
   for(const c of shown){
     const g=c.date?`${MONTHS_LONG[c.date.m]} ${c.date.y}`:"Undated";
     if(g!==cur){if(cur)h+="</div>";h+=`<div class="month"><h3>${g}</h3>`;cur=g}
-    const tag=c.url?"a":"div", href=c.url?` href="${esc(c.url)}" target="_blank" rel="noopener"`:"";
+    const ext=c.url?`<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener" aria-label="Open on Concert Archives" title="Open on Concert Archives"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
     const tour=c.title&&!c.bands.includes(c.title)?`<div class="tour">${esc(c.title)}</div>`:"";
     const up=c.status==="upcoming";
-    h+=`<${tag} class="show${up?" up":attended(c)?"":" off"}"${href}><div class="date"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></div><div>${tour}<div class="acts">${c.bands.map(esc).join('<span class="sep">/</span>')}</div><div class="where">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}</div></${tag}>`;
+    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><div class="date"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></div><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
   }
   if(cur)h+="</div>";
   $("list").innerHTML=h||'<div class="empty">No shows match.</div>';
   const more=$("more");
   more.hidden=rows.length<=SHOWN;
   more.textContent=`Show more (${rows.length-SHOWN} left)`;
-  more.onclick=()=>{SHOWN+=80;renderList(rows,attendedCount)};
+  more.onclick=()=>{SHOWN+=80;renderList(rows,attendedCount,title)};
 }
 
 async function load(){
