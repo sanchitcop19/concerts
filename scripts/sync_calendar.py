@@ -17,7 +17,7 @@ export are kept.
 Usage:  CALENDAR_ICS_URL=... python3 scripts/sync_calendar.py [--ics local.ics] [--dry-run]
 Standard library only.
 """
-import csv, io, os, re, sys, urllib.request
+import csv, io, os, re, sys, urllib.error, urllib.request
 from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -133,11 +133,20 @@ def main():
     else:
         url = os.environ.get("CALENDAR_ICS_URL", "").strip()
         if not url:
-            sys.exit("Set CALENDAR_ICS_URL (the calendar's private iCal address).")
-        req = urllib.request.Request(url, headers={"User-Agent": "concerts-calendar-sync"})
-        text = urllib.request.urlopen(req, timeout=60).read().decode("utf-8")
+            sys.exit("Set CALENDAR_ICS_URL (the Concert Archives calendar feed link).")
+        if url.lower().startswith("webcal://"):  # calendar apps' scheme for the same https feed
+            url = "https://" + url[len("webcal://"):]
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; concerts-calendar-sync)",
+                                                   "Accept": "text/calendar, */*"})
+        try:
+            text = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")
+            if "Just a moment" in body or "cf-" in body:
+                sys.exit(f"HTTP {e.code}: the feed is behind Cloudflare's bot check and blocked this server.")
+            sys.exit(f"HTTP {e.code} fetching the calendar feed. Check the link.")
     if "BEGIN:VCALENDAR" not in text:
-        sys.exit("That URL didn't return a calendar. Check the iCal address.")
+        sys.exit("That link didn't return a calendar. Check the feed link.")
 
     cal_rows = [r for r in map(to_row, parse_ics(text)) if r]
     with open(CSV_PATH, newline="", encoding="utf-8-sig") as f:
