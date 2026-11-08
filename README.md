@@ -53,7 +53,7 @@ Two ways to get it on your phone:
 
 **Quick: Add to Home Screen.** Open the site in Safari, tap Share, then **Add to Home Screen**. It gets the app icon and opens full-screen.
 
-**Real app (Xcode).** `ios/` holds a small SwiftUI app that shows the live dashboard. Data and design updates appear without a new build. It has pull-to-refresh and swipe-back, opens Concert Archives links in Safari, and falls back to the last copy it loaded when you're offline.
+**Real app (Xcode).** `ios/` holds a small SwiftUI app with four tabs: **Home** (show count and the next 2 weeks), **Stats** (all-time numbers and charts), **Years** (a year picker with that year in review) and **Shows** (search and every show). Each tab is the live site opened with `?view=home|stats|years|shows`, so data and design updates appear without a new build. Pages don't bounce, and each tab refreshes when you come back to the app. Swipe back works on artist, venue and concert pages, Concert Archives links open in Safari, and it falls back to the last copy it loaded when you're offline.
 ```sh
 brew install xcodegen          # one time
 cd ios && xcodegen             # creates Concerts.xcodeproj
