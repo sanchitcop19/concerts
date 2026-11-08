@@ -16,6 +16,16 @@ The dashboard reads the first of these files it finds:
 
 Column names are detected automatically (date, bands/artists, venue, city, state, country). The page footer shows which column it mapped to each field.
 
+### Recommended: automatic, from your calendar
+Concert Archives adds every show to a Google Calendar called **Sanchit's Concert Archive**. Every morning, `.github/workflows/sync-calendar.yml` reads that calendar, merges any new or changed shows into `data/concerts.csv` (`scripts/sync_calendar.py`), and redeploys the site. You don't have to export anything.
+
+One-time setup:
+1. In Google Calendar on a computer, hover over **Sanchit's Concert Archive**, click **⋮ → Settings and sharing**, and scroll to **Integrate calendar**. Copy the **Secret address in iCal format**.
+2. In this repo, go to **Settings → Secrets and variables → Actions → New repository secret**. Name it `CALENDAR_ICS_URL` and paste the address.
+3. Under **Actions → Sync from calendar → Run workflow**, run it once now. After that it runs daily.
+
+The secret address lets anyone read that calendar, so keep it in the secret only, never in a file. The sync only adds or updates shows and never deletes any. A show that's been cancelled still needs a fresh export to be marked Cancelled.
+
 ### Option A: upload by hand
 On GitHub, open `data/`, click **Add file → Upload files**, drop in the export, and rename it to `concerts.csv` (or `concerts.xlsx`). The site redeploys in about a minute.
 

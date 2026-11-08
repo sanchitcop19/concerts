@@ -1,0 +1,52 @@
+# Every morning: read the Concert Archives Google Calendar, merge new shows into
+# data/concerts.csv, commit, and redeploy the site.
+# Needs one repo secret: CALENDAR_ICS_URL = the calendar's "Secret address in iCal format".
+name: Sync from calendar
+
+on:
+  schedule:
+    - cron: "17 13 * * *"   # 13:17 UTC = 5:17am Pacific (6:17am during PST)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: calendar-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge calendar into data/concerts.csv
+        id: sync
+        env:
+          CALENDAR_ICS_URL: ${{ secrets.CALENDAR_ICS_URL }}
+        run: |
+          if [ -z "$CALENDAR_ICS_URL" ]; then
+            echo "::warning::CALENDAR_ICS_URL secret is not set yet. Skipping."
+            exit 0
+          fi
+          python3 scripts/sync_calendar.py
+          if git diff --quiet data/concerts.csv; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Commit
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "concerts-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/concerts.csv
+          git commit -m "Sync shows from Concert Archives calendar"
+          git push
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows, so start the deploy explicitly.
+      - name: Redeploy site
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref "${{ github.ref_name }}"
