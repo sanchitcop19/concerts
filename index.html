@@ -670,7 +670,6 @@ function renderDash(){
 // Hero stat cards: [value, label, hover explanation]
 function heroStats(list,went,artists,venues,cities){
   const countries=new Set(list.map(c=>c.country).filter(Boolean));
-  const repeat=[...artists.values()].filter(v=>v>1).length;
   const out=[
     [artists.size,"artists","Different acts you've seen"],
     [venues.size,"venues","Different venues"],
@@ -694,7 +693,6 @@ function heroStats(list,went,artists,venues,cities){
     const recent=list.filter(c=>c.date&&c.date.t>yearAgo).length;
     if(recent) out.push([(recent/12).toFixed(1),"shows / month",`${recent} shows in the last 12 months`]);
   }
-  out.push([repeat,"seen 2+ times","Acts you've seen more than once"]);
   return out;
 }
 
