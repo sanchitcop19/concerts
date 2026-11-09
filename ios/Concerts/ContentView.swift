@@ -40,9 +40,10 @@ struct ContentView: View {
     @StateObject private var years = PageModel(url: AppTab.years.url)
     @StateObject private var shows = PageModel(url: AppTab.shows.url)
     @Environment(\.scenePhase) private var scenePhase
+    @State private var tab = AppTab.home
 
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             ForEach(AppTab.allCases) { tab in
                 TabPage(page: model(for: tab))
                     .tabItem { Label(tab.title, systemImage: tab.icon) }
@@ -55,6 +56,14 @@ struct ContentView: View {
             if phase == .active {
                 AppTab.allCases.forEach { model(for: $0).refreshIfStale() }
             }
+        }
+        // Tapping a show on the home screen widget opens stubs://show/<id>: show it on the Home tab.
+        .onOpenURL { link in
+            guard link.scheme == "stubs", link.host == "show",
+                  let id = link.pathComponents.last(where: { $0 != "/" }),
+                  let target = URL(string: "\(siteRoot)?view=home#/show/\(id)") else { return }
+            tab = .home
+            home.open(target)
         }
     }
 
@@ -138,6 +147,12 @@ final class PageModel: NSObject, ObservableObject, WKNavigationDelegate {
         failed = false
         triedCache = false
         webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 20))
+    }
+
+    /// Go to a page inside the dashboard (e.g. a concert from the widget).
+    func open(_ target: URL) {
+        failed = false
+        webView.load(URLRequest(url: target))
     }
 
     /// Reload if this tab hasn't been refreshed for a minute (called when the app comes back to the foreground).
