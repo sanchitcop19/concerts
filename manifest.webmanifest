@@ -1,6 +1,6 @@
 {
   "name": "Sanchit's Concert Archive",
-  "short_name": "Concerts",
+  "short_name": "Stubs",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
