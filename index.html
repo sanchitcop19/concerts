@@ -243,6 +243,7 @@ a.date:hover .d{color:var(--accent-ink)}
 .show .acts .sep{color:var(--ink-3);font-weight:400;padding:0 4px}
 .show .tour{font-size:12px;color:var(--accent-ink);margin-bottom:2px;font-weight:500}
 .show .where{font-size:13px;color:var(--ink-2);margin-top:2px}
+.show .where .when{white-space:nowrap}
 .badge{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .show.off{opacity:.6}
 .show.off .acts{text-decoration:line-through;text-decoration-color:var(--ink-3)}
@@ -426,7 +427,7 @@ document.addEventListener("scroll",()=>tip.classList.remove("on"),{passive:true}
 
 // ---------- State ----------
 let ALL=[], YEAR="", Q="", SHOWN=40;
-// Start/doors times for upcoming shows, looked up on Ticketmaster at deploy: {id:{start:"20:00",doors:"19:00"}}
+// Start/doors times, looked up on Ticketmaster before each show (and kept after): {id:{start:"20:00",doors:"19:00"}}
 let TIMES={};
 const clock=t=>{const [h,m]=t.split(":").map(Number);return `${h%12||12}${m?":"+String(m).padStart(2,"0"):""} ${h<12?"AM":"PM"}`};
 const timeLabel=(c,both)=>{const t=TIMES[c.id]||{};return t.doors?`Doors ${clock(t.doors)}${both&&t.start&&t.start!==t.doors?` · Show ${clock(t.start)}`:""}`:t.start?`Starts ${clock(t.start)}`:""};
@@ -576,7 +577,7 @@ function renderShow(c){
   const up=c.status==="upcoming";
   $("eyebrow").textContent=up&&c.date?`Concert · ${whenLabel(c.date.key)}`:attended(c)?"Concert":`Concert · ${c.status}`;
   $("heroNum").textContent=name;
-  $("heroSub").textContent=c.date?[`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`,up&&timeLabel(c,true)].filter(Boolean).join(" · "):"Date unknown";
+  $("heroSub").textContent=c.date?[`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`,timeLabel(c,true)].filter(Boolean).join(" · "):"Date unknown";
   $("heroRange").innerHTML=[c.title&&!c.bands.includes(c.title)?esc(c.title):"",c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ");
 
   // Position in your history, counting this show even if it hasn't happened yet.
@@ -795,7 +796,7 @@ function renderList(rows,attendedCount,title){
     const ext=c.url?`<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener" aria-label="Open on Concert Archives" title="Open on Concert Archives"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
     const tour=c.title&&!c.bands.includes(c.title)?`<div class="tour">${esc(c.title)}</div>`:"";
     const up=c.status==="upcoming";
-    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><a class="date" href="${hrefFor("show",c.id)}" aria-label="Open this concert"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></a><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
+    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><a class="date" href="${hrefFor("show",c.id)}" aria-label="Open this concert"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></a><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place),timeLabel(c)&&`<span class="when">${timeLabel(c)}</span>`].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
   }
   if(cur)h+="</div>";
   $("list").innerHTML=h||'<div class="empty">No shows match.</div>';
