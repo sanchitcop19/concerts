@@ -628,7 +628,7 @@ function renderDash(){
   $("heroRange").textContent=dated.length?`${fmtDate(dated[0].date)} — ${fmtDate(dated.at(-1).date)}`:"";
   $("chips").style.setProperty("--n",2);
   $("chips").innerHTML=heroStats(list,went,artists,venues,cities)
-    .map(([v,l,tip])=>`<div class="chip" data-tip="${esc(tip)}"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+    .map(([v,l])=>`<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
   renderTickets(ALL);
   $("noUpcoming").hidden=!(VIEW==="home"&&$("nextUp").hidden);
   if(VIEW==="stats"){
