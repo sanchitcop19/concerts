@@ -431,6 +431,9 @@ let ALL=[], YEAR="", Q="", SHOWN=40;
 let TIMES={};
 const clock=t=>{const [h,m]=t.split(":").map(Number);return `${h%12||12}${m?":"+String(m).padStart(2,"0"):""} ${h<12?"AM":"PM"}`};
 const timeLabel=(c,both)=>{const t=TIMES[c.id]||{};return t.doors?`Doors ${clock(t.doors)}${both&&t.start&&t.start!==t.doors?` · Show ${clock(t.start)}`:""}`:t.start?`Starts ${clock(t.start)}`:""};
+// Ticketmaster event page for a show, when the lookup found one.
+const eventUrl=c=>{const u=(TIMES[c.id]||{}).url||"";return /^https:\/\//.test(u)?u:""};
+const TICKET_SVG='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>';
 // Which app tab this page is (?view=home|stats|years|shows). Empty on the normal website.
 const VIEW=(new URLSearchParams(location.search).get("view")||"").toLowerCase();
 if(VIEW) document.body.classList.add("view-"+VIEW);
@@ -578,7 +581,7 @@ function renderShow(c){
   $("eyebrow").textContent=up&&c.date?`Concert · ${whenLabel(c.date.key)}`:attended(c)?"Concert":`Concert · ${c.status}`;
   $("heroNum").textContent=name;
   $("heroSub").textContent=c.date?[`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`,timeLabel(c,true)].filter(Boolean).join(" · "):"Date unknown";
-  $("heroRange").innerHTML=[c.title&&!c.bands.includes(c.title)?esc(c.title):"",c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ");
+  $("heroRange").innerHTML=[c.title&&!c.bands.includes(c.title)?esc(c.title):"",c.venue&&link("venue",c.venue),c.place&&link("city",c.place),eventUrl(c)&&`<a class="tm" href="${esc(eventUrl(c))}" target="_blank" rel="noopener">${up?"Tickets":"Event page"} ↗</a>`].filter(Boolean).join(" · ");
 
   // Position in your history, counting this show even if it hasn't happened yet.
   const chrono=(rows)=>[...new Set([...rows,c])].filter(x=>x.date).sort((a,b)=>a.date.t-b.date.t||a.id.localeCompare(b.id));
@@ -794,9 +797,10 @@ function renderList(rows,attendedCount,title){
     const g=c.date?`${MONTHS_LONG[c.date.m]} ${c.date.y}`:"Undated";
     if(g!==cur){if(cur)h+="</div>";h+=`<div class="month"><h3>${g}</h3>`;cur=g}
     const ext=c.url?`<a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener" aria-label="Open on Concert Archives" title="Open on Concert Archives"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
+    const tm=eventUrl(c)?`<a class="ext" href="${esc(eventUrl(c))}" target="_blank" rel="noopener" aria-label="Open on Ticketmaster" title="Open on Ticketmaster">${TICKET_SVG}</a>`:"";
     const tour=c.title&&!c.bands.includes(c.title)?`<div class="tour">${esc(c.title)}</div>`:"";
     const up=c.status==="upcoming";
-    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><a class="date" href="${hrefFor("show",c.id)}" aria-label="Open this concert"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></a><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place),timeLabel(c)&&`<span class="when">${timeLabel(c)}</span>`].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${ext}</div></div>`;
+    h+=`<div class="show${up?" up":attended(c)?"":" off"}"><a class="date" href="${hrefFor("show",c.id)}" aria-label="Open this concert"><div class="d num">${c.date?c.date.d:"?"}</div><div class="w">${c.date?DOWS[c.date.dow]:""}</div></a><div>${tour}<div class="acts">${c.bands.map(b=>link("artist",b)).join('<span class="sep">/</span>')}</div><div class="where">${[c.venue&&link("venue",c.venue),c.place&&link("city",c.place),timeLabel(c)&&`<span class="when">${timeLabel(c)}</span>`].filter(Boolean).join(" · ")}</div></div><div class="badge-wrap">${attended(c)?"":`<span class="badge${up?" up":""}">${up&&c.date&&c.date.key===TODAY?"Tonight":esc(c.status)}</span>`}${tm}${ext}</div></div>`;
   }
   if(cur)h+="</div>";
   $("list").innerHTML=h||'<div class="empty">No shows match.</div>';

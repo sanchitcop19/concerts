@@ -7,7 +7,7 @@ on:
     branches: [master]
   workflow_dispatch:
   schedule:
-    - cron: "17 14 * * *" # daily, so show times Ticketmaster adds later get picked up
+    - cron: "17 * * * *" # hourly, so show times Ticketmaster adds or changes get picked up quickly
 
 permissions:
   contents: read
