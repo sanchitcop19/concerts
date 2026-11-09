@@ -30,6 +30,8 @@ jobs:
           cp index.html manifest.webmanifest _site/
           cp -r icons _site/
           cp data/* _site/data/
+          # Small summary for the iPhone home screen widget
+          if [ -f data/concerts.csv ]; then python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json; fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

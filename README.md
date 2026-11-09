@@ -61,6 +61,8 @@ open Concerts.xcodeproj
 ```
 In Xcode, open the **Concerts** target, go to **Signing & Capabilities**, and pick your team. Plug in your iPhone (turn on Settings → Privacy & Security → Developer Mode the first time), choose it as the run destination, and press ▶. To install without a cable, use **Product → Archive → Distribute App → TestFlight**.
 
+**Home screen widget.** The app comes with a widget: long-press your home screen, tap **+**, search **Stubs** (or **Concerts**). Small shows your next show with a countdown ("Tomorrow", "In 6 days"), medium shows your total plus the next 3 shows, and there are lock screen versions too. Tap a show to open it in the app. It reads `data/widget.json`, which the deploy writes from `data/concerts.csv` (`scripts/build_widget_json.py`), and checks for new data about once an hour.
+
 The app icon is drawn by `icons/make_icons.py` (`python3 icons/make_icons.py` regenerates every size).
 
 ## One-time GitHub Pages setup

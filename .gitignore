@@ -1,5 +1,6 @@
 ios/*.xcodeproj/
 ios/Concerts/Info.plist
+ios/ConcertsWidget/Info.plist
 ios/build/
 robot/node_modules/
 robot/debug.html
