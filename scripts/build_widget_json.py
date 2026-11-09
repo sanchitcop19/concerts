@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Write the small JSON file the iPhone home screen widget reads.
 
-    python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json
+    python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json [times.json]
 
 It holds how many shows you've been to and the next upcoming ones. The widget
 counts any of those that have since passed, so the number stays right between deploys.
+Start/doors times come from times.json (scripts/lookup_times.py) when given.
 """
 import csv, json, sys
 from datetime import date, datetime
@@ -39,7 +40,14 @@ def split_bands(s):
     return out
 
 
-def main(src, dst):
+def main(src, dst, times_path=None):
+    times = {}
+    if times_path:
+        try:
+            with open(times_path, encoding="utf-8") as f:
+                times = json.load(f)
+        except (OSError, ValueError):
+            pass
     today = datetime.now(TZ).date()
     attended, upcoming = 0, []
     with open(src, newline="", encoding="utf-8-sig") as f:
@@ -55,13 +63,16 @@ def main(src, dst):
                 bands = split_bands(col(row, "Bands Seen", "Concert Name", "Bands Not Seen"))
                 url = col(row, "URL")
                 location = col(row, "Location")
+                sid = url.rstrip("/").split("/")[-1] if url else ""
+                t = times.get(sid, {})
                 upcoming.append({
                     "date": d.isoformat(),
                     "title": bands[0] if bands else col(row, "Concert Name") or "Concert",
                     "with": bands[1:],
                     "venue": col(row, "Venue"),
                     "city": location.split(",")[0].strip() if location else "",
-                    "id": url.rstrip("/").split("/")[-1] if url else "",
+                    "id": sid,
+                    **{k: t[k] for k in ("start", "doors") if t.get(k)},
                 })
             elif status == "past" or (not status and d is not None):
                 attended += 1
@@ -74,4 +85,4 @@ def main(src, dst):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:3])
+    main(*sys.argv[1:4])

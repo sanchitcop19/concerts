@@ -426,6 +426,10 @@ document.addEventListener("scroll",()=>tip.classList.remove("on"),{passive:true}
 
 // ---------- State ----------
 let ALL=[], YEAR="", Q="", SHOWN=40;
+// Start/doors times for upcoming shows, looked up on Ticketmaster at deploy: {id:{start:"20:00",doors:"19:00"}}
+let TIMES={};
+const clock=t=>{const [h,m]=t.split(":").map(Number);return `${h%12||12}${m?":"+String(m).padStart(2,"0"):""} ${h<12?"AM":"PM"}`};
+const timeLabel=(c,both)=>{const t=TIMES[c.id]||{};return t.doors?`Doors ${clock(t.doors)}${both&&t.start&&t.start!==t.doors?` · Show ${clock(t.start)}`:""}`:t.start?`Starts ${clock(t.start)}`:""};
 // Which app tab this page is (?view=home|stats|years|shows). Empty on the normal website.
 const VIEW=(new URLSearchParams(location.search).get("view")||"").toLowerCase();
 if(VIEW) document.body.classList.add("view-"+VIEW);
@@ -480,7 +484,7 @@ function renderTickets(rows){
   $("nextUpLabel").textContent=all?"Coming up":"Next 2 weeks";
   $("nextUp").hidden=!upcoming.length;
   $("nextUpCount").textContent=`${plural(upcoming.length,"show")}${later?` · ${later} more after that`:""}`;
-  $("tickets").innerHTML=upcoming.map(c=>`<a class="ticket" href="${hrefFor("show",c.id)}"><div class="stub"><div class="m">${MONTHS[c.date.m]}</div><div class="d">${c.date.d}</div></div><div class="info"><div class="tag-up">${whenLabel(c.date.key)}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></a>`).join("");
+  $("tickets").innerHTML=upcoming.map(c=>`<a class="ticket" href="${hrefFor("show",c.id)}"><div class="stub"><div class="m">${MONTHS[c.date.m]}</div><div class="d">${c.date.d}</div></div><div class="info"><div class="tag-up">${[whenLabel(c.date.key),timeLabel(c)].filter(Boolean).join(" · ")}</div><div class="t">${esc(c.bands.join(" / "))}</div><div class="v">${esc([c.venue,c.place].filter(Boolean).join(" · "))}</div></div></a>`).join("");
 }
 
 function renderYearCols(el,rows,yearsAll,clickable){
@@ -572,7 +576,7 @@ function renderShow(c){
   const up=c.status==="upcoming";
   $("eyebrow").textContent=up&&c.date?`Concert · ${whenLabel(c.date.key)}`:attended(c)?"Concert":`Concert · ${c.status}`;
   $("heroNum").textContent=name;
-  $("heroSub").textContent=c.date?`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`:"Date unknown";
+  $("heroSub").textContent=c.date?[`${FULL_DOW[c.date.dow]}, ${MONTHS_LONG[c.date.m]} ${c.date.d}, ${c.date.y}`,up&&timeLabel(c,true)].filter(Boolean).join(" · "):"Date unknown";
   $("heroRange").innerHTML=[c.title&&!c.bands.includes(c.title)?esc(c.title):"",c.venue&&link("venue",c.venue),c.place&&link("city",c.place)].filter(Boolean).join(" · ");
 
   // Position in your history, counting this show even if it hasn't happened yet.
@@ -815,6 +819,7 @@ async function load(){
   ALL=normalize(parsed.data,cols);
   // Stable id per show for #/show/<id>: the Concert Archives slug, else its row number.
   ALL.forEach((c,i)=>{c.id=(c.url.split("/").filter(Boolean).pop()||"")||`row-${i}`});
+  try{const r=await fetch("data/times.json",{cache:"no-store"});if(r.ok)TIMES=await r.json()}catch(e){}
   if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code>.</div>';
   const missing=["date","bands","venue"].filter(k=>!cols[k]);
   $("foot").innerHTML=`Data: ${esc(src)} · columns: ${Object.entries(cols).filter(([,v])=>v).map(([k,v])=>`${k} → “${esc(v)}”`).join(", ")}${missing.length?` · <b>missing: ${missing.join(", ")}</b>`:""}`;
