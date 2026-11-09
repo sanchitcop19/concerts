@@ -23,6 +23,8 @@ targets:
       path: Concerts/Info.plist
       properties:
         CFBundleDisplayName: Stubs
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:
@@ -48,6 +50,8 @@ targets:
       path: ConcertsWidget/Info.plist
       properties:
         CFBundleDisplayName: Stubs
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
