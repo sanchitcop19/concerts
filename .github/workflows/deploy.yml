@@ -39,7 +39,10 @@ jobs:
             python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json _site/data/times.json
           fi
         env:
-          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          # Either secret name works
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY || secrets.TICKETMASTER_KEY }}
+          # Last published times, so shows that already happened keep theirs
+          PREVIOUS_TIMES_URL: https://sanchitcop19.github.io/concerts/data/times.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

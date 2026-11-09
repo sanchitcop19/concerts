@@ -133,9 +133,28 @@ def upcoming_shows(src):
             }
 
 
+def previous_times():
+    """Times from the last deploy. Ticketmaster stops listing a show once it's over,
+    so this is how past shows keep their doors/start times."""
+    url = os.environ.get("PREVIOUS_TIMES_URL", "").strip()
+    if not url:
+        return {}
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "stubs-concerts"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.load(r)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        print(f"  couldn't load previous times: {e}")
+        return {}
+
+
 def main(src, dst):
     key = os.environ.get("TICKETMASTER_API_KEY", "").strip()
-    found = {}
+    upcoming_ids = {s["id"] for s in upcoming_shows(src)}
+    # Keep old times for shows that are no longer upcoming; upcoming ones get looked up fresh.
+    found = {k: v for k, v in previous_times().items() if k not in upcoming_ids}
+    kept = len(found)
     if not key:
         print("times.json: no TICKETMASTER_API_KEY, skipping lookups")
     else:
@@ -153,7 +172,8 @@ def main(src, dst):
                 print(f"  {label}: {t.get('doors', '?')} doors, {t.get('start', '?')} start")
             else:
                 print(f"  {label}: not found")
-        print(f"times.json: matched {len(found)} shows")
+        print(f"times.json: matched {len(found) - kept} upcoming shows")
+    print(f"times.json: kept {kept} past shows from the last deploy")
     with open(dst, "w", encoding="utf-8") as f:
         json.dump(found, f, indent=1)
 
