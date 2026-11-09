@@ -82,11 +82,33 @@ def best_match(events, show):
     return max(scored, key=lambda x: x[0])[1] if scored else None
 
 
+NUMBERS = {"a": 1, "an": 1, "one": 1, "two": 2, "thirty": 30, "forty-five": 45, "ninety": 90}
+
+
+def doors_before_start(text, start):
+    """'Doors open one hour before show time' / 'doors 30 minutes prior' + start '18:00' -> '17:00'."""
+    m = re.search(r"doors?(?:\s+open)?\s+(half an|\d+|[a-z-]+)\s+(hours?|minutes?|mins?)\s+(?:before|prior)", text or "", re.I)
+    if not (m and start):
+        return None
+    n, unit = m.group(1).lower(), m.group(2).lower()
+    if n == "half an":
+        mins = 30
+    else:
+        count = int(n) if n.isdigit() else NUMBERS.get(n)
+        mins = count and count * (60 if unit.startswith("h") else 1)
+    if not mins or mins > 180:
+        return None
+    h, mm = map(int, start.split(":"))
+    t = h * 60 + mm - mins
+    return f"{t // 60:02d}:{t % 60:02d}" if t >= 0 else None
+
+
 def times_for(ev):
     dates = ev.get("dates", {})
     out = {"start": hhmm(dates.get("start", {}).get("localTime"))}
     doors = hhmm((dates.get("doorsTimes") or {}).get("localTime"))
-    doors = doors or doors_from_text(" ".join(filter(None, [ev.get("pleaseNote"), ev.get("info")])))
+    notes = " ".join(filter(None, [ev.get("pleaseNote"), ev.get("info")]))
+    doors = doors or doors_before_start(notes, out["start"]) or doors_from_text(notes)
     if doors:
         out["doors"] = doors
     if ev.get("url"):
