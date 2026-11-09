@@ -19,6 +19,15 @@ struct Show: Codable, Hashable {
     let venue: String
     let city: String
     let id: String
+    var start: String? = nil // "20:00", from Ticketmaster
+    var doors: String? = nil
+
+    /// "Doors 7 PM", or "Starts 8 PM" when only the show time is known.
+    var timeLabel: String? {
+        if let d = doors.flatMap(clock) { return "Doors \(d)" }
+        if let s = start.flatMap(clock) { return "Starts \(s)" }
+        return nil
+    }
 
     var day: Date? {
         let f = DateFormatter()
@@ -123,6 +132,14 @@ func whenLabel(_ show: Show, from now: Date) -> String {
     }
 }
 
+/// "19:30" -> "7:30 PM"
+func clock(_ t: String) -> String? {
+    let p = t.split(separator: ":").compactMap { Int($0) }
+    guard p.count >= 2 else { return nil }
+    let h = p[0] % 12 == 0 ? 12 : p[0] % 12
+    return "\(h)\(p[1] == 0 ? "" : String(format: ":%02d", p[1])) \(p[0] < 12 ? "AM" : "PM")"
+}
+
 func monthDay(_ show: Show) -> (String, String) {
     guard let d = show.day else { return ("", "") }
     let f = DateFormatter()
@@ -156,13 +173,16 @@ struct WidgetView: View {
                 Text("NEXT SHOW").tracking(0.6).font(.caption2.weight(.bold)).foregroundStyle(accent)
                 Spacer(minLength: 4)
                 Text(s.title).font(.headline).foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.8)
-                if let other = s.with.first {
+                if s.timeLabel == nil, let other = s.with.first { // no room for both
                     Text("+ \(other)").font(.caption).foregroundStyle(.white.opacity(0.6)).lineLimit(1)
                 }
                 Text(s.venue).font(.caption).foregroundStyle(.white.opacity(0.6)).lineLimit(1)
                 Spacer(minLength: 4)
                 Text(whenLabel(s, from: entry.date)).font(.title3.weight(.bold)).foregroundStyle(accent)
                     .lineLimit(1).minimumScaleFactor(0.7)
+                if let t = s.timeLabel {
+                    Text(t).font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .widgetURL(s.id.isEmpty ? nil : s.link)
@@ -222,7 +242,8 @@ struct WidgetView: View {
     @ViewBuilder var rectangular: some View {
         if let s = entry.next.first {
             VStack(alignment: .leading, spacing: 0) {
-                Text(whenLabel(s, from: entry.date)).font(.caption.weight(.bold))
+                Text([whenLabel(s, from: entry.date), s.timeLabel].compactMap { $0 }.joined(separator: " · "))
+                    .font(.caption.weight(.bold)).lineLimit(1)
                 Text(s.title).font(.headline).lineLimit(1)
                 Text(place(s)).font(.caption).lineLimit(1).foregroundStyle(.secondary)
             }

@@ -6,6 +6,8 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+  schedule:
+    - cron: "17 14 * * *" # daily, so show times Ticketmaster adds later get picked up
 
 permissions:
   contents: read
@@ -30,8 +32,14 @@ jobs:
           cp index.html manifest.webmanifest _site/
           cp -r icons _site/
           cp data/* _site/data/
-          # Small summary for the iPhone home screen widget
-          if [ -f data/concerts.csv ]; then python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json; fi
+          if [ -f data/concerts.csv ]; then
+            # Start/doors times for upcoming shows (skipped if the secret isn't set)
+            python3 scripts/lookup_times.py data/concerts.csv _site/data/times.json
+            # Small summary for the iPhone home screen widget
+            python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json _site/data/times.json
+          fi
+        env:
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
