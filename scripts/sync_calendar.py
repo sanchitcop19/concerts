@@ -14,9 +14,11 @@ then MERGE into the existing CSV, keyed by the Concert Archives URL:
     (e.g. "NAMM"), so the export's "Bands Seen" is the better list,
   * a CANCELLED event marks the show Cancelled (the feed also uses this for rescheduled shows,
     so an existing Rescheduled status is kept),
-  * nothing is ever deleted.
+  * a show that's no longer in the feed (deleted on Concert Archives) is removed. Rows with no
+    Concert Archives URL are kept. If more than MAX_REMOVALS shows would go at once, the feed is
+    probably broken, so we stop and change nothing (pass --force to remove them anyway).
 
-Usage:  CALENDAR_ICS_URL=... python3 scripts/sync_calendar.py [--ics local.ics] [--dry-run]
+Usage:  CALENDAR_ICS_URL=... python3 scripts/sync_calendar.py [--ics local.ics] [--dry-run] [--force]
 Standard library only.
 """
 import csv, io, os, re, sys, urllib.error, urllib.request
@@ -28,6 +30,7 @@ CSV_PATH = os.path.join(ROOT, "data", "concerts.csv")
 HEADERS = ["Start Date", "End Date", "Nonstandard Concert Type", "Status", "Concert Name",
            "Bands Seen", "Bands Not Seen", "Venue", "Location", "URL"]
 HOME_TZ = ZoneInfo("America/Los_Angeles")
+MAX_REMOVALS = 10  # more missing shows than this in one run looks like a truncated feed, not deletions
 CA_URL = re.compile(r"https://www\.concertarchives\.org/[^\s\"<>\\]+")
 
 
@@ -99,8 +102,17 @@ def sort_key(row):
     except ValueError:
         return date.min
 
-def merge(existing, cal_rows):
+def merge(existing, cal_rows, force=False):
     by_url = {r["URL"]: r for r in existing if r.get("URL")}
+    # Shows deleted on Concert Archives drop out of the feed: drop them here too.
+    in_feed = {c["URL"] for c in cal_rows}
+    gone = [r for r in existing if r.get("URL") and r["URL"] not in in_feed]
+    if len(gone) > MAX_REMOVALS and not force:
+        sys.exit(f"{len(gone)} shows are missing from the calendar feed; that looks like a broken feed, "
+                 "so nothing was changed. Run with --force if they really were deleted.")
+    for r in gone:
+        print(f"removed: {r['Start Date']} {r['Bands Seen'] or r['Concert Name']} @ {r['Venue']}")
+    existing[:] = [r for r in existing if not (r.get("URL") and r["URL"] not in in_feed)]
     added = updated = 0
     for c in cal_rows:
         row = by_url.get(c["URL"])
@@ -126,7 +138,7 @@ def merge(existing, cal_rows):
         if r.get("Status") == "Upcoming" and sort_key(r) < today:
             r["Status"] = "Past"
     existing.sort(key=sort_key, reverse=True)
-    return added, updated
+    return added, updated, len(gone)
 
 
 def main():
@@ -157,8 +169,8 @@ def main():
     if cal_rows == [] and existing:
         sys.exit("Calendar had no Concert Archives events; leaving the data alone.")
 
-    added, updated = merge(existing, cal_rows)
-    print(f"calendar: {len(cal_rows)} shows · added {added} · updated {updated} · total {len(existing)}")
+    added, updated, removed = merge(existing, cal_rows, force="--force" in args)
+    print(f"calendar: {len(cal_rows)} shows · added {added} · updated {updated} · removed {removed} · total {len(existing)}")
     if "--dry-run" in args:
         return
     buf = io.StringIO()
