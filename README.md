@@ -73,3 +73,12 @@ Repo **Settings → Pages → Source: GitHub Actions**. Every push to `master` t
 python3 -m http.server
 # open http://localhost:8000
 ```
+
+## Setlists → Spotify
+`.github/workflows/sync-setlists.yml` runs daily. For every past show it pulls the setlist from [setlist.fm](https://www.setlist.fm), matches each song on Spotify, and keeps a private playlist named `YYYY-MM-DD · Artist @ Venue`. In Spotify, go to **Your Library → Playlists → Sort: Alphabetical** and they're listed oldest first. There's also **Concert Setlists · All Shows (oldest first)**, which plays every setlist in order. Results are cached in `data/setlists.json`. The first run spreads over a few days because of API limits.
+
+One-time setup (4 repo secrets under **Settings → Secrets and variables → Actions**):
+1. `SETLISTFM_API_KEY`: apply at https://www.setlist.fm/settings/api (approval is instant).
+2. `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`: create an app at https://developer.spotify.com/dashboard with redirect URI `http://127.0.0.1:8888/callback` and "Web API" ticked.
+3. `SPOTIFY_REFRESH_TOKEN`: on your computer, run `SPOTIFY_CLIENT_ID=… SPOTIFY_CLIENT_SECRET=… python3 scripts/spotify_auth.py`, log in, and copy the printed token.
+4. Go to **Actions → Sync setlists to Spotify → Run workflow**.

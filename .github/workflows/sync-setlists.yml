@@ -1,0 +1,45 @@
+# Daily: fetch setlists from setlist.fm for past shows and keep one private Spotify playlist per show
+# ("YYYY-MM-DD · Artist @ Venue", sort Your Library alphabetically = oldest first) plus an all-shows playlist.
+# Secrets: SETLISTFM_API_KEY, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN.
+name: Sync setlists to Spotify
+
+on:
+  schedule:
+    - cron: "41 14 * * *"
+  workflow_dispatch:
+  push:
+    paths: ["scripts/sync_setlists.py", "tests/test_sync_setlists.py"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: setlist-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: python3 -m unittest discover -s tests -v
+      - name: Sync
+        if: github.event_name != 'push' || github.ref_name == 'master'
+        env:
+          SETLISTFM_API_KEY: ${{ secrets.SETLISTFM_API_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+        run: python3 scripts/sync_setlists.py
+      - name: Commit cache
+        if: always()
+        run: |
+          [ -f data/setlists.json ] || exit 0
+          git add data/setlists.json
+          git diff --cached --quiet && exit 0
+          git config user.name "concerts-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sync setlists to Spotify"
+          git pull --rebase && git push
