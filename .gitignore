@@ -5,3 +5,4 @@ ios/build/
 robot/node_modules/
 robot/debug.html
 __pycache__/
+fail-*.png

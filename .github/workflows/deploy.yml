@@ -31,12 +31,14 @@ jobs:
           mkdir -p _site/data
           cp index.html manifest.webmanifest _site/
           cp -r icons _site/
-          cp data/* _site/data/
+          cp -r data/. _site/data/
           if [ -f data/concerts.csv ]; then
+            # Concert Archives shows + shows added in the app (data/added.json)
+            python3 scripts/added_shows.py merge data/concerts.csv data/added.json "$RUNNER_TEMP/all.csv"
             # Start/doors times for upcoming shows (skipped if the secret isn't set)
-            python3 scripts/lookup_times.py data/concerts.csv _site/data/times.json
+            python3 scripts/lookup_times.py "$RUNNER_TEMP/all.csv" _site/data/times.json
             # Small summary for the iPhone home screen widget
-            python3 scripts/build_widget_json.py data/concerts.csv _site/data/widget.json _site/data/times.json
+            python3 scripts/build_widget_json.py "$RUNNER_TEMP/all.csv" _site/data/widget.json _site/data/times.json
           fi
         env:
           # Either secret name works

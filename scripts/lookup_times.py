@@ -125,7 +125,7 @@ def upcoming_shows(src):
                 continue
             url, loc = col(row, "URL"), col(row, "Location")
             yield {
-                "id": url.rstrip("/").split("/")[-1] if url else "",
+                "id": col(row, "ID") or (url.rstrip("/").split("/")[-1] if url else ""),  # ID: shows added in the app
                 "date": d,
                 "bands": split_bands(col(row, "Bands Seen", "Concert Name", "Bands Not Seen")),
                 "venue": col(row, "Venue"),
