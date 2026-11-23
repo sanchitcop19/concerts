@@ -259,6 +259,95 @@ a.date:hover .d{color:var(--accent-ink)}
 #tip b{font-size:14px}
 .banner{background:#fff4d6;color:#6b4e00;border-radius:12px;padding:10px 14px;font-size:14px;margin-top:16px}
 footer{color:var(--ink-3);font-size:12px;margin-top:40px}
+/* ---------- Add a show ---------- */
+.fab{position:fixed;z-index:30;right:max(20px,env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));display:inline-flex;align-items:center;gap:8px;
+  border:0;border-radius:999px;padding:14px 20px 14px 16px;background:var(--accent);color:#fff;font:600 15px Inter,sans-serif;cursor:pointer;
+  box-shadow:0 2px 4px rgba(40,20,120,.18),0 10px 28px rgba(60,40,160,.32);transition:transform .15s,box-shadow .15s,background .15s}
+.fab:hover{background:var(--accent-ink);transform:translateY(-1px)}
+.fab:active{transform:scale(.97)}
+.fab:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:3px}
+:root[data-theme="dark"] .fab,:root[data-theme="dark"] .fab:hover{color:#15121f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fab{color:#15121f}}
+body.show-page .fab,body.sheet-open .fab{display:none}
+.sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(12,10,20,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity .18s}
+.sheet-bg.on{opacity:1}
+.sheet{position:relative;width:min(600px,100%);height:min(760px,calc(100dvh - 48px));display:flex;flex-direction:column;background:var(--bg);color:var(--ink);border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden;transform:translateY(14px);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.sheet-bg.on .sheet{transform:none}
+.sheet-head{display:flex;align-items:center;gap:10px;padding:18px 18px 12px 22px}
+.sheet-head h2{flex:1;margin:0;font:800 26px/1.1 "Bricolage Grotesque",Inter,sans-serif;letter-spacing:-.025em}
+.icon-btn{flex:0 0 auto;display:grid;place-items:center;width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.icon-btn:hover{color:var(--ink);border-color:var(--ink-3)}
+.sheet-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 18px 24px;-webkit-overflow-scrolling:touch}
+.sheet-tools{position:sticky;top:0;z-index:2;background:var(--bg);padding:2px 0 12px;display:flex;flex-direction:column;gap:10px}
+.sheet .search{flex:none;width:100%}
+.sheet .search input{font-size:16px;padding:12px 14px 12px 40px;border-radius:14px}
+.sheet .search svg{left:14px}
+.seg{display:flex;gap:6px}
+.seg .pill{padding:6px 14px}
+.ev-group{margin-top:8px}
+.ev-group h3{margin:14px 2px 8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px}
+.ev-group h3 span{letter-spacing:0;text-transform:none;font-weight:500;font-size:12px}
+.ev{width:100%;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px 10px 10px;margin-bottom:8px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.ev:hover,.ev:focus-visible{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));outline:none}
+.ev-date{text-align:center;border-right:1px dashed var(--line);padding-right:10px;line-height:1}
+.ev-date i{display:block;font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-ink);font-weight:700}
+.ev-date b{display:block;font:800 24px/1.05 "Bricolage Grotesque",sans-serif;margin:3px 0 2px}
+.ev-date small{font-size:11px;color:var(--ink-3)}
+.ev-name{display:block;font-weight:600;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ev-sub{display:block;font-size:13px;color:var(--ink-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-act{display:grid;place-items:center;width:34px;height:34px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent-ink)}
+.ev:hover .ev-act{background:var(--accent);color:#fff}
+.ev.have .ev-act{width:auto;height:auto;padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2)}
+mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.sheet-note{color:var(--ink-3);font-size:13px;line-height:1.45;margin:16px 2px 0}
+.manual{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;padding:14px;border:1.5px dashed var(--line);border-radius:14px;background:none;color:var(--ink);font:600 14px Inter,sans-serif;cursor:pointer;text-align:left}
+.manual:hover{border-color:var(--accent);color:var(--accent-ink)}
+.manual small{display:block;font-weight:400;color:var(--ink-3);font-size:13px;margin-top:2px}
+.manual .ev-act{flex:0 0 auto}
+.skeleton{height:62px;border-radius:14px;margin-bottom:8px;background:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.form{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--ink-3)}
+.field>span em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400}
+.field input,.field textarea{width:100%;font:15px/1.4 Inter,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px;resize:vertical}
+.field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+@media (hover:none),(max-width:600px){.field input,.field textarea{font-size:16px}}
+.row3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.src{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.src a{color:var(--accent-ink);font-weight:600;text-decoration:none;margin-left:auto;white-space:nowrap}
+.status-hint{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.status-hint i{width:8px;height:8px;border-radius:50%;background:var(--s3)}
+.status-hint.up i{background:var(--accent)}
+.actions{display:flex;gap:10px;align-items:center;margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:12px 20px;font:600 15px Inter,sans-serif;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;flex:1}
+.btn.primary:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+:root[data-theme="dark"] .btn.primary{color:#15121f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#15121f}}
+.btn[disabled]{opacity:.6;cursor:progress}
+.back-link{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--ink-2);font:600 14px Inter,sans-serif;cursor:pointer;padding:4px 8px 4px 0}
+.back-link:hover{color:var(--ink)}
+.err{color:#c2185b;font-size:14px;margin:0}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;color:var(--ink-2);font-size:14px}
+.steps b{color:var(--ink)}
+.steps a{color:var(--accent-ink);font-weight:600}
+.lead{margin:0;color:var(--ink-2);font-size:15px}
+.toast{position:fixed;z-index:70;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;transition:opacity .2s,transform .2s;background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 16px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;gap:14px;align-items:center;width:max-content;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast a{color:inherit;font-weight:700;white-space:nowrap}
+.btn-hero.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.22);cursor:pointer;font-family:Inter,sans-serif}
+.btn-hero.ghost:hover{background:rgba(255,255,255,.18)}
+@media (max-width:600px){
+  .sheet-bg{padding:0;align-items:flex-end}
+  .sheet{width:100%;height:calc(100dvh - env(safe-area-inset-top) - 10px);border-radius:22px 22px 0 0;transform:translateY(40px)}
+  .sheet-body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+  .row3{grid-template-columns:1fr 1fr}.row3 .field:first-child{grid-column:1/-1}
+  .fab{padding:14px 18px 14px 14px}
+}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet-bg,.toast,.fab{transition:none}.skeleton{animation:none}}
 </style>
 </head>
 <body>
@@ -342,6 +431,70 @@ footer{color:var(--ink-3);font-size:12px;margin-top:40px}
   <footer id="foot"></footer>
 </main>
 <div id="tip" role="tooltip"></div>
+
+<button class="fab" id="addBtn" type="button" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add show</button>
+
+<div class="sheet-bg" id="addBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <div class="sheet-head"><h2 id="addTitle">Add a show</h2>
+      <button class="icon-btn" id="addClose" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sheet-body" id="addBody">
+      <!-- 1. Search the event database -->
+      <div id="stepSearch">
+        <div class="sheet-tools">
+          <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="aq" type="search" placeholder="Artist, venue or city" aria-label="Search events" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search"></label>
+          <div class="seg" id="aWhen" role="group" aria-label="When">
+            <button class="pill" type="button" data-w="" aria-pressed="true">Any time</button>
+            <button class="pill" type="button" data-w="up" aria-pressed="false">Upcoming</button>
+            <button class="pill" type="button" data-w="past" aria-pressed="false">Past</button>
+          </div>
+        </div>
+        <div id="aRes" aria-live="polite"></div>
+        <button class="manual" id="aManual" type="button"><span class="ev-act"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span>Can't find it? Add it by hand<small>Any show, anywhere: just the date and who played.</small></span></button>
+        <p class="sheet-note" id="aInfo"></p>
+      </div>
+
+      <!-- 2. Check the details -->
+      <form class="form" id="stepForm" hidden novalidate>
+        <button class="back-link" type="button" data-back><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Search</button>
+        <div class="src" id="fSrc" hidden></div>
+        <label class="field"><span>Who played <em>· one act per line, headliner first</em></span><textarea id="fBands" rows="3" required></textarea></label>
+        <div class="row2">
+          <label class="field"><span>Date</span><input id="fDate" type="date" required></label>
+          <label class="field"><span>Start time <em>· optional</em></span><input id="fTime" type="time"></label>
+        </div>
+        <label class="field"><span>Venue</span><input id="fVenue" list="venueList" autocomplete="off"></label>
+        <div class="row3">
+          <label class="field"><span>City</span><input id="fCity" list="cityList" autocomplete="off"></label>
+          <label class="field"><span>State / region</span><input id="fState" autocomplete="off"></label>
+          <label class="field"><span>Country</span><input id="fCountry" autocomplete="off"></label>
+        </div>
+        <label class="field"><span>Event or tour name <em>· optional</em></span><input id="fTitle" autocomplete="off" placeholder="e.g. a festival"></label>
+        <div class="status-hint" id="fHint"></div>
+        <p class="err" id="fErr" hidden></p>
+        <div class="actions"><button class="btn primary" id="fSave" type="submit">Add to my shows</button></div>
+      </form>
+
+      <!-- 3. One-time GitHub connection (saves go to data/added.json in the repo) -->
+      <form class="form" id="stepConnect" hidden novalidate>
+        <button class="back-link" type="button" data-back-form><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Back</button>
+        <p class="lead">Your shows are kept in your GitHub repo, so saving one needs a GitHub token that can write to it. You only do this once on each device; the token stays on this device.</p>
+        <ol class="steps">
+          <li><a id="tokLink" target="_blank" rel="noopener">Create a token on GitHub ↗</a></li>
+          <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b id="tokRepo">concerts</b>.</li>
+          <li>Under <b>Permissions → Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
+          <li>Click <b>Generate token</b>, copy it and paste it below.</li>
+        </ol>
+        <label class="field"><span>Token</span><input id="tok" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <p class="err" id="tokErr" hidden></p>
+        <div class="actions"><button class="btn primary" id="tokSave" type="submit">Save and add show</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+<datalist id="venueList"></datalist><datalist id="cityList"></datalist>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -430,9 +583,10 @@ let ALL=[], YEAR="", Q="", SHOWN=40;
 // Start/doors times, looked up on Ticketmaster before each show (and kept after): {id:{start:"20:00",doors:"19:00"}}
 let TIMES={};
 const clock=t=>{const [h,m]=t.split(":").map(Number);return `${h%12||12}${m?":"+String(m).padStart(2,"0"):""} ${h<12?"AM":"PM"}`};
-const timeLabel=(c,both)=>{const t=TIMES[c.id]||{};return t.doors?`Doors ${clock(t.doors)}${both&&t.start&&t.start!==t.doors?` · Show ${clock(t.start)}`:""}`:t.start?`Starts ${clock(t.start)}`:""};
+const timesFor=c=>TIMES[c.id]||(c.start?{start:c.start}:{});
+const timeLabel=(c,both)=>{const t=timesFor(c);return t.doors?`Doors ${clock(t.doors)}${both&&t.start&&t.start!==t.doors?` · Show ${clock(t.start)}`:""}`:t.start?`Starts ${clock(t.start)}`:""};
 // Ticketmaster event page for a show, when the lookup found one.
-const eventUrl=c=>{const u=(TIMES[c.id]||{}).url||"";return /^https:\/\//.test(u)?u:""};
+const eventUrl=c=>{const u=(TIMES[c.id]||{}).url||c.eventUrl||"";return /^https:\/\//.test(u)?u:""};
 const TICKET_SVG='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>';
 // Which app tab this page is (?view=home|stats|years|shows). Empty on the normal website.
 const VIEW=(new URLSearchParams(location.search).get("view")||"").toLowerCase();
@@ -470,6 +624,7 @@ function render(){
   const r=route();
   $("noUpcoming").hidden=true;
   document.body.classList.toggle("detail",!!r);
+  document.body.classList.toggle("show-page",!!r&&r.kind==="show");
   $("dash").hidden=!!r; $("detail").hidden=!r; $("back").hidden=!r;
   if(r&&r.kind==="show"){
     const c=ALL.find(x=>x.id===r.name);
@@ -597,8 +752,10 @@ function renderShow(c){
   if(firstTimers&&c.date) chips.push([firstTimers,firstTimers===1?"first-time act":"first-time acts"]);
   setChips(chips);
 
-  $("heroActions").hidden=!c.url;
-  $("heroActions").innerHTML=c.url?`<a class="btn-hero" href="${esc(c.url)}" target="_blank" rel="noopener">Open on Concert Archives <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:"";
+  $("heroActions").hidden=!c.url&&!c.added;
+  $("heroActions").innerHTML=c.url?`<a class="btn-hero" href="${esc(c.url)}" target="_blank" rel="noopener">Open on Concert Archives <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`
+    :c.added?`<button class="btn-hero ghost" id="rmShow" type="button">Remove from my shows</button>`:"";
+  if(c.added) $("rmShow").onclick=()=>removeAdded(c);
   $("nextUp").hidden=true;
   $("dYearCard").hidden=true;
 
@@ -810,6 +967,281 @@ function renderList(rows,attendedCount,title){
   more.onclick=()=>{SHOWN+=80;renderList(rows,attendedCount,title)};
 }
 
+// ---------- Shows added in the app ----------
+// They live in data/added.json, which the page commits through the GitHub API with a token kept
+// on this device. Until the site redeploys (about a minute) they're kept locally as "pending".
+const REPO=(()=>{const h=location.hostname.match(/^([\w-]+)\.github\.io$/),p=location.pathname.split("/").filter(Boolean)[0];
+  return h&&p?{owner:h[1],repo:p,branch:"master"}:{owner:"sanchitcop19",repo:"concerts",branch:"master"}})();
+const store={get(k,d){try{const v=localStorage.getItem("stubs."+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{v==null?localStorage.removeItem("stubs."+k):localStorage.setItem("stubs."+k,JSON.stringify(v))}catch(e){}}};
+// Accent-, case- and punctuation-insensitive text for matching.
+const fold=s=>String(s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
+const nameKey=s=>fold(s).replace(/\b(the|theatre|theater|ballroom|club|hall)\b/g,"").replace(/ /g,"");
+const overlaps=(a,b)=>{a=nameKey(a);b=nameKey(b);return !!(a&&b)&&(a.includes(b)||b.includes(a))};
+// The same night, and the same venue or a shared act. Mirrors same_show() in scripts/added_shows.py.
+const sameShow=(a,b)=>!!(a.date&&b.date&&a.date.key===b.date.key)&&(overlaps(a.venue,b.venue)||a.bands.some(x=>b.bands.some(y=>overlaps(x,y))));
+function fromAdded(s){
+  const date=parseDate(s.date);
+  let status=String(s.status||"").toLowerCase();
+  if(status!=="cancelled") status=date&&date.key>=TODAY?"upcoming":"past";
+  const bands=(s.bands||[]).filter(Boolean);
+  return {date,status,bands:bands.length?bands:(s.title?[s.title]:[]),title:s.title||"",venue:s.venue||"",city:s.city||"",country:s.country||"",
+    place:[s.city,s.state||s.country].filter(Boolean).join(", "),url:"",id:s.id,added:s,start:s.start||"",eventUrl:/^https:\/\//.test(s.url||"")?s.url:""};
+}
+// Deployed added.json + this device's saves that haven't been deployed yet.
+function withPending(shows){
+  const p=store.get("pending",{adds:[],removes:[]}), fresh=x=>Date.now()-(x.t||0)<6*36e5;
+  const have=new Set(shows.map(s=>s.id));
+  p.adds=(p.adds||[]).filter(x=>fresh(x)&&!have.has(x.show.id));
+  p.removes=(p.removes||[]).filter(x=>fresh(x)&&have.has(x.id));
+  store.set("pending",p);
+  const gone=new Set(p.removes.map(x=>x.id));
+  return [...shows.filter(s=>!gone.has(s.id)),...p.adds.map(x=>x.show)];
+}
+function mergeAdded(csvRows,shows){
+  return [...csvRows,...shows.map(fromAdded).filter(a=>a.date&&!csvRows.some(c=>sameShow(a,c)))];
+}
+let CSV_ROWS=[], ADDED_RAW=[];
+const rebuild=()=>{ALL=mergeAdded(CSV_ROWS,withPending(ADDED_RAW));fillLists()};
+function fillLists(){
+  const opts=m=>topN(m,400).map(([k])=>`<option value="${esc(k)}">`).join("");
+  $("venueList").innerHTML=opts(count(ALL,c=>c.venue));
+  $("cityList").innerHTML=opts(count(ALL,c=>c.city));
+}
+
+// GitHub contents API: read data/added.json, change it, write it back (retrying if it moved under us).
+const b64enc=str=>{const b=new TextEncoder().encode(str);let out="";for(let i=0;i<b.length;i+=8192)out+=String.fromCharCode(...b.subarray(i,i+8192));return btoa(out)};
+const b64dec=str=>new TextDecoder().decode(Uint8Array.from(atob(str.replace(/\s/g,"")),c=>c.charCodeAt(0)));
+class NeedToken extends Error{}
+async function commitAdded(change,message){
+  const token=store.get("ghToken","");
+  if(!token) throw new NeedToken("");
+  const api=`https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/data/added.json`;
+  const h={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  for(let attempt=0;attempt<3;attempt++){
+    const r=await fetch(`${api}?ref=${REPO.branch}&t=${Date.now()}`,{headers:h,cache:"no-store"});
+    if(r.status===401) throw new NeedToken("GitHub didn't accept that token. It may have expired. Make a new one.");
+    let sha,data={shows:[]};
+    if(r.ok){const j=await r.json();sha=j.sha;try{data=JSON.parse(b64dec(j.content))}catch(e){}}
+    else if(r.status!==404) throw new Error(`GitHub answered ${r.status}. Try again in a minute.`);
+    if(!Array.isArray(data.shows)) data.shows=[];
+    change(data);
+    const put=await fetch(api,{method:"PUT",headers:h,body:JSON.stringify({message,branch:REPO.branch,sha,content:b64enc(JSON.stringify(data,null,1)+"\n")})});
+    if(put.ok) return data;
+    if(put.status===409||(put.status===422&&sha)) continue; // changed meanwhile: re-read and retry
+    if(put.status===401) throw new NeedToken("GitHub didn't accept that token. It may have expired. Make a new one.");
+    if(put.status===403||put.status===404) throw new NeedToken(`That token can't write to ${REPO.repo}. Give it access to the ${REPO.repo} repository with Contents set to “Read and write”.`);
+    throw new Error(`GitHub answered ${put.status}. Try again in a minute.`);
+  }
+  throw new Error("Couldn't save after a few tries. Try again in a minute.");
+}
+
+let toastTimer;
+function toast(html,ms=5200){const t=$("toast");t.innerHTML=html;t.classList.add("on");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("on"),ms)}
+
+async function removeAdded(c){
+  if(!confirm(`Remove ${c.bands.join(" / ")||"this show"} from your shows?`)) return;
+  const b=$("rmShow"); b.disabled=true; b.textContent="Removing…";
+  try{
+    await commitAdded(d=>{d.shows=d.shows.filter(s=>s.id!==c.id)},`Remove show: ${c.bands[0]||c.title} (${c.added.date})`);
+    const p=store.get("pending",{adds:[],removes:[]});
+    p.adds=(p.adds||[]).filter(x=>x.show.id!==c.id); p.removes=[...(p.removes||[]),{id:c.id,t:Date.now()}];
+    store.set("pending",p);
+    ADDED_RAW=ADDED_RAW.filter(s=>s.id!==c.id); rebuild();
+    toast("Removed.");
+    depth>0?history.back():(location.hash="");
+  }catch(e){
+    b.disabled=false; b.textContent="Remove from my shows";
+    if(e instanceof NeedToken){openAdd();showConnect(e.message,()=>removeAdded(c))}
+    else toast(esc(e.message||"Couldn't remove it."));
+  }
+}
+
+// ---------- The event database (data/events/, built daily by scripts/build_events.py) ----------
+let EVENTS=null, EV_INDEX=null, evLoading=null;
+function loadEvents(){
+  return evLoading||(evLoading=(async()=>{
+    const r=await fetch("data/events/index.json",{cache:"no-cache"});
+    if(!r.ok) throw new Error("no event database");
+    EV_INDEX=await r.json();
+    const parts=await Promise.all(Object.keys(EV_INDEX.months||{}).map(m=>fetch(`data/events/${m}.json`).then(x=>x.ok?x.json():{events:[]}).catch(()=>({events:[]}))));
+    EVENTS=parts.flatMap(p=>p.events||[]).map(e=>{const a=e.a||[e.n];return {...e,a,date:parseDate(e.d),hay:" "+fold([e.n,...a,e.v,e.c].join(" "))}});
+    return EVENTS;
+  })().catch(e=>{evLoading=null;throw e}));
+}
+let A_WHEN="", A_FROM=null, A_AFTER=null;
+const evToShow=e=>({date:e.date,venue:e.v||"",bands:e.a});
+const haveShow=e=>ALL.find(c=>sameShow(evToShow(e),c));
+const clock12=t=>t?clock(t):"";
+function hl(text,toks){
+  // Highlight the words being searched for (on the folded text, mapped back by position when lengths match).
+  let h=esc(text);
+  for(const t of toks){if(t.length<2)continue;const re=new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`,"ig");h=h.replace(re,"<mark>$1</mark>")}
+  return h;
+}
+function evRow(e,toks){
+  const have=haveShow(e), d=e.date;
+  const sub=[e.v,[e.c,e.co&&e.co!=="United States"?e.co:""].filter(Boolean).join(", "),clock12(e.t)].filter(Boolean).join(" · ");
+  const acts=e.a.length>1||fold(e.a[0])!==fold(e.n)?e.a.join(" / "):e.n;
+  return `<button class="ev${have?" have":""}" type="button" data-id="${esc(e.id)}"><span class="ev-date"><i>${MONTHS[d.m]}</i><b class="num">${d.d}</b><small>${d.y}</small></span><span><span class="ev-name">${hl(acts,toks)}</span><span class="ev-sub">${hl(sub,toks)}</span></span>${have?`<span class="ev-act">Yours</span>`:`<span class="ev-act" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>`}</button>`;
+}
+const LIMIT=40;
+function group(title,list,toks,total){
+  if(!list.length) return "";
+  return `<div class="ev-group"><h3>${title}${total>list.length?`<span>First ${list.length} of ${total}</span>`:""}</h3>${list.map(e=>evRow(e,toks)).join("")}</div>`;
+}
+// Events matching every word, in two groups: upcoming (soonest first) and past (latest first).
+function searchEvents(events,q,when,today=TODAY,home=""){
+  const toks=fold(q).split(" ").filter(Boolean);
+  let list=events.filter(e=>e.date&&(when==="up"?e.d>=today:when==="past"?e.d<today:true));
+  if(toks.length) list=list.filter(e=>toks.every(t=>e.hay.includes(" "+t)||(t.length>2&&e.hay.includes(t))));
+  else{ // nothing typed: what's on around your home city, last week and next two weeks
+    const lo=localKey(new Date(Date.now()-7*DAY)), hi=localKey(new Date(Date.now()+14*DAY));
+    list=list.filter(e=>(!home||e.m===home)&&e.d>=lo&&e.d<=hi);
+  }
+  const up=list.filter(e=>e.d>=today).sort((a,b)=>a.d.localeCompare(b.d)||(a.t||"").localeCompare(b.t||""));
+  const past=list.filter(e=>e.d<today).sort((a,b)=>b.d.localeCompare(a.d));
+  return {toks,up,past};
+}
+function renderResults(){
+  const el=$("aRes");
+  if(!EVENTS){el.innerHTML=[1,2,3,4,5].map(()=>'<div class="skeleton"></div>').join("");return}
+  const q=$("aq").value, home=(EV_INDEX.markets||[])[0]?.name||"";
+  const {toks,up,past}=searchEvents(EVENTS,q,A_WHEN,TODAY,home);
+  let h;
+  if(!toks.length){
+    h=group(`Coming up${home?` around ${esc(home)}`:""}`,up.slice(0,LIMIT),toks,up.length)+group(`Last few days${home?` around ${esc(home)}`:""}`,past.slice(0,LIMIT),toks,past.length);
+  }else{
+    h=group("Upcoming",up.slice(0,LIMIT),toks,up.length)+group("Past",past.slice(0,LIMIT),toks,past.length);
+    if(!up.length&&!past.length) h=`<div class="empty" style="padding:18px 4px">No events match “${esc(q)}”${A_WHEN?` ${A_WHEN==="up"?"coming up":"in the past"}`:""}. Try fewer words, or add it by hand below.</div>`;
+  }
+  el.innerHTML=h;
+  el.querySelectorAll(".ev").forEach(b=>b.onclick=()=>pickEvent(EVENTS.find(e=>e.id===b.dataset.id)));
+}
+function renderInfo(){
+  if(!EV_INDEX){$("aInfo").textContent="";return}
+  const ms=(EV_INDEX.markets||[]).map(m=>m.name);
+  const upd=EV_INDEX.generated?new Date(EV_INDEX.generated):null;
+  $("aInfo").innerHTML=`${(EV_INDEX.count||EVENTS.length).toLocaleString()} concerts and comedy shows${ms.length?` in and around ${esc(ms.slice(0,-1).join(", "))}${ms.length>1?" and ":""}${esc(ms.at(-1))}`:""}, from Ticketmaster (upcoming) and setlist.fm (past), ${esc(fmtDate(parseDate(EV_INDEX.from)))} to ${esc(fmtDate(parseDate(EV_INDEX.to)))}.${upd&&!isNaN(upd)?` Updated ${upd.toLocaleDateString(undefined,{month:"short",day:"numeric"})}.`:""}`;
+}
+
+// ---------- The sheet ----------
+const STEPS=["stepSearch","stepForm","stepConnect"];
+const step=id=>{STEPS.forEach(s=>$(s).hidden=s!==id);$("addBody").scrollTop=0};
+let lastFocus=null;
+function openAdd(prefill){
+  if(!$("addBg").hidden) return;
+  lastFocus=document.activeElement;
+  $("addBg").hidden=false; document.body.classList.add("sheet-open"); document.documentElement.style.overflow="hidden";
+  requestAnimationFrame(()=>$("addBg").classList.add("on"));
+  step("stepSearch");
+  if(prefill!=null) $("aq").value=prefill;
+  renderResults();
+  loadEvents().then(()=>{renderResults();renderInfo()}).catch(()=>{$("aRes").innerHTML='<div class="empty" style="padding:12px 4px">The event list isn\'t available right now. You can still add a show by hand.</div>'});
+  if(matchMedia("(hover:hover)").matches) setTimeout(()=>$("aq").focus(),60);
+}
+function closeAdd(){
+  if($("addBg").hidden) return;
+  $("addBg").classList.remove("on"); document.body.classList.remove("sheet-open"); document.documentElement.style.overflow="";
+  setTimeout(()=>{$("addBg").hidden=true},200);
+  lastFocus&&lastFocus.focus&&lastFocus.focus();
+}
+// What the + button searches for: the artist or venue whose page you're on.
+const prefillFor=()=>{const r=route();return r&&(r.kind==="artist"||r.kind==="venue")?r.name:null};
+$("addBtn").onclick=()=>openAdd(prefillFor());
+$("addClose").onclick=closeAdd;
+$("addBg").addEventListener("click",e=>{if(e.target===$("addBg"))closeAdd()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("addBg").hidden)closeAdd()});
+let aqT;$("aq").addEventListener("input",()=>{clearTimeout(aqT);aqT=setTimeout(renderResults,90)});
+$("aq").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();e.target.blur()}});
+$("aWhen").querySelectorAll(".pill").forEach(b=>b.onclick=()=>{A_WHEN=b.dataset.w;$("aWhen").querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-pressed",x===b));renderResults()});
+$("aManual").onclick=()=>pickEvent(null);
+document.querySelector("[data-back]").onclick=()=>step("stepSearch");
+document.querySelector("[data-back-form]").onclick=()=>A_AFTER?(A_AFTER=null,closeAdd()):step("stepForm");
+
+function pickEvent(e){
+  const have=e&&haveShow(e);
+  if(have){closeAdd();location.hash=hrefFor("show",have.id);return}
+  A_FROM=e;
+  const q=$("aq").value.trim();
+  $("fBands").rows=Math.min(6,Math.max(2,e?e.a.length:2));
+  $("fBands").value=e?e.a.join("\n"):(q&&!ALL.some(c=>fold(c.venue)===fold(q)||fold(c.city)===fold(q))?q:"");
+  $("fDate").value=e?e.d:"";
+  $("fTime").value=e?.t||"";
+  $("fVenue").value=e?.v||"";
+  $("fCity").value=e?.c||"";
+  $("fState").value=e?.s||"";
+  $("fCountry").value=e?(e.co||"United States"):"";
+  // A festival or event name ("Capitol Hill Block Party"), not a listing that's just the acts
+  $("fTitle").value=e&&e.a.length>1&&!e.a.some(a=>fold(e.n).includes(fold(a)))?e.n:"";
+  const srcName=e?(e.id.startsWith("tm:")?"Ticketmaster":"setlist.fm"):"";
+  $("fSrc").hidden=!e;
+  $("fSrc").innerHTML=e?`From ${srcName}${e.u?`<a href="${esc(e.u)}" target="_blank" rel="noopener">View ↗</a>`:""}`:"";
+  $("fErr").hidden=true;
+  updateHint();
+  step("stepForm");
+  if(!e) setTimeout(()=>$("fBands").focus(),60);
+}
+function updateHint(){
+  const d=parseDate($("fDate").value), up=d&&d.key>=TODAY;
+  $("fHint").className="status-hint"+(up?" up":"");
+  $("fHint").innerHTML=d?`<i></i>${up?(d.key===TODAY?"Tonight. It'll show under Coming up until tomorrow.":`Coming up, ${whenLabel(d.key).toLowerCase()}.`):"A show you went to. It counts in your stats."}`:"";
+}
+$("fDate").addEventListener("input",updateHint);
+$("fDate").addEventListener("change",updateHint);
+
+const slug=s=>fold(s).replace(/ /g,"-").slice(0,40)||"show";
+function formShow(){
+  const bands=[...new Set($("fBands").value.split(/\n|\s+\/\s+/).map(x=>x.trim()).filter(Boolean))];
+  const date=$("fDate").value;
+  if(!bands.length&&!$("fTitle").value.trim()) return "Add who played.";
+  if(!parseDate(date)) return "Add the date.";
+  const show={id:`a-${date}-${slug(bands[0]||$("fTitle").value)}-${Math.random().toString(36).slice(2,6)}`,date,bands,
+    title:$("fTitle").value.trim(),venue:$("fVenue").value.trim(),city:$("fCity").value.trim(),state:$("fState").value.trim(),
+    country:$("fCountry").value.trim(),start:$("fTime").value||"",url:A_FROM?.u||"",source:A_FROM?.id||"manual",added:new Date().toISOString()};
+  return Object.fromEntries(Object.entries(show).filter(([,v])=>v!==""&&!(Array.isArray(v)&&!v.length)));
+}
+async function saveShow(){
+  const show=formShow();
+  if(typeof show==="string"){$("fErr").textContent=show;$("fErr").hidden=false;return}
+  const dupe=ALL.find(c=>sameShow(fromAdded(show),c));
+  if(dupe&&!confirm(`You already have ${dupe.bands.join(" / ")} on ${fmtDate(dupe.date)}. Add this one too?`)) return;
+  const btn=$("fSave"); btn.disabled=true; btn.textContent="Saving…"; $("fErr").hidden=true;
+  try{
+    await commitAdded(d=>{d.shows=[...d.shows.filter(s=>s.id!==show.id),show].sort((a,b)=>b.date.localeCompare(a.date))},`Add show: ${show.bands?.[0]||show.title} (${show.date})`);
+    const p=store.get("pending",{adds:[],removes:[]}); p.adds=[...(p.adds||[]),{show,t:Date.now()}]; store.set("pending",p);
+    rebuild(); closeAdd();
+    if(!route()) render(); else location.hash="";
+    const name=(show.bands||[show.title])[0];
+    toast(`Added <b>${esc(name)}</b>. It's on all your devices in about a minute. <a href="${hrefFor("show",show.id)}">View</a>`);
+  }catch(e){
+    if(e instanceof NeedToken) showConnect(e.message,saveShow);
+    else{$("fErr").textContent=e.message||"Couldn't save. Try again.";$("fErr").hidden=false}
+  }finally{btn.disabled=false;btn.textContent="Add to my shows"}
+}
+$("stepForm").addEventListener("submit",e=>{e.preventDefault();saveShow()});
+
+// One-time token setup. GitHub pre-fills the new token's name, repo owner and permission from the link.
+let afterConnect=null;
+function showConnect(msg,then){
+  afterConnect=then; A_AFTER=$("stepForm").hidden?then:null;
+  $("tokRepo").textContent=REPO.repo;
+  $("tokLink").href=`https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({name:`Stubs (${new Date().toLocaleDateString()})`,description:"Lets the Stubs concert app add shows to data/added.json",target_name:REPO.owner,expires_in:"none",contents:"write"})}`;
+  $("tok").value="";
+  $("tokErr").textContent=msg||""; $("tokErr").hidden=!msg;
+  $("tokSave").textContent=A_AFTER?"Save and remove show":"Save and add show";
+  step("stepConnect");
+}
+$("stepConnect").addEventListener("submit",e=>{
+  e.preventDefault();
+  const v=$("tok").value.trim();
+  if(!/^(github_pat_|ghp_|gho_)\w{20,}$/.test(v)){$("tokErr").textContent="That doesn't look like a GitHub token. It starts with github_pat_.";$("tokErr").hidden=false;return}
+  store.set("ghToken",v);
+  const then=afterConnect; afterConnect=null;
+  if(A_AFTER){A_AFTER=null;closeAdd()} else step("stepForm");
+  then&&then();
+});
+
 async function load(){
   let src=null,text=null;
   for(const f of ["data/concerts.csv","data/concerts.xlsx","data/sample.csv"]){
@@ -821,9 +1253,11 @@ async function load(){
   if(text==null){$("heroSub").textContent="No data yet. Add data/concerts.csv";return}
   const parsed=Papa.parse(text.replace(/^﻿/,""),{header:true,skipEmptyLines:true});
   const cols=pickColumns(parsed.meta.fields||[]);
-  ALL=normalize(parsed.data,cols);
+  CSV_ROWS=normalize(parsed.data,cols);
   // Stable id per show for #/show/<id>: the Concert Archives slug, else its row number.
-  ALL.forEach((c,i)=>{c.id=(c.url.split("/").filter(Boolean).pop()||"")||`row-${i}`});
+  CSV_ROWS.forEach((c,i)=>{c.id=(c.url.split("/").filter(Boolean).pop()||"")||`row-${i}`});
+  try{const r=await fetch("data/added.json",{cache:"no-store"});if(r.ok)ADDED_RAW=(await r.json()).shows||[]}catch(e){}
+  rebuild();
   try{const r=await fetch("data/times.json",{cache:"no-store"});if(r.ok)TIMES=await r.json()}catch(e){}
   if(src.endsWith("sample.csv")) $("banner").innerHTML='<div class="banner">Showing <b>sample data</b>. Add your Concert Archives export as <code>data/concerts.csv</code>.</div>';
   const missing=["date","bands","venue"].filter(k=>!cols[k]);

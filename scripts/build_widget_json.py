@@ -63,7 +63,7 @@ def main(src, dst, times_path=None):
                 bands = split_bands(col(row, "Bands Seen", "Concert Name", "Bands Not Seen"))
                 url = col(row, "URL")
                 location = col(row, "Location")
-                sid = url.rstrip("/").split("/")[-1] if url else ""
+                sid = col(row, "ID") or (url.rstrip("/").split("/")[-1] if url else "")  # ID: shows added in the app
                 t = times.get(sid, {})
                 upcoming.append({
                     "date": d.isoformat(),

@@ -48,6 +48,14 @@ node robot/scrape.mjs --headed        # first run: watch it work and click Cloud
 - Safety net: it won't overwrite the CSV if it suddenly finds 20%+ fewer shows (e.g. a half-loaded page).
 - Limitation: it can't see whether a show was cancelled, so cancelled shows count as attended. The manual export doesn't have this problem.
 
+### Adding shows in the app
+Tap **Add show** (bottom right, on the website and in the iPhone app). Search the event database by artist, venue or city, pick the show, check the details and save. Anything not in the database can be added by hand.
+
+- **Event database** (`data/events/`): built daily by `.github/workflows/build-events.yml` (`scripts/build_events.py`) for the cities you go to shows in most (worked out from your history; nearby cities like Tacoma count as Seattle). Covers 24 months back and 12 months ahead: upcoming concerts and comedy from Ticketmaster (`TICKETMASTER_API_KEY` secret), past shows from setlist.fm (`SETLISTFM_API_KEY`, backfilled over the first few days).
+- **Where added shows go**: `data/added.json`, committed straight from the page with the GitHub API, so they appear everywhere after the next deploy (about a minute; the device that added it shows it right away). The calendar sync never touches this file. When you later log the same show on Concert Archives, the sync drops the added copy so it isn't counted twice.
+- **One-time setup per device**: the first save asks for a GitHub token. Create one at https://github.com/settings/personal-access-tokens/new with access to only this repo and **Contents: Read and write**. It's stored only on that device (Safari and the iPhone app each need it once).
+- Added shows can be removed from their show page.
+
 ## iPhone app
 Two ways to get it on your phone:
 

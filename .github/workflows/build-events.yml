@@ -1,0 +1,50 @@
+# Daily: refresh the event database the site's "Add a show" search reads (data/events/).
+# Upcoming shows from Ticketmaster, past shows from setlist.fm, for the cities you go to shows in.
+# Secrets: TICKETMASTER_API_KEY (or TICKETMASTER_KEY), SETLISTFM_API_KEY. Either one alone works.
+name: Build event database
+
+on:
+  schedule:
+    - cron: "23 11 * * *"
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ["scripts/build_events.py"]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: build-events
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: python3 -m unittest discover -s tests -v
+      - name: Build
+        env:
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY || secrets.TICKETMASTER_KEY }}
+          SETLISTFM_API_KEY: ${{ secrets.SETLISTFM_API_KEY }}
+        run: python3 scripts/build_events.py
+      - name: Commit
+        id: commit
+        run: |
+          git add data/events
+          if git diff --cached --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "concerts-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh event database"
+          git pull --rebase && git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows, so start the deploy explicitly.
+      - name: Redeploy site
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref master

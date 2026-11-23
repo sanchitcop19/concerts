@@ -1,0 +1,144 @@
+{
+ "generated": "2026-11-23T13:05:58-08:00",
+ "from": "2024-11-01",
+ "to": "2027-11-30",
+ "markets": [
+  {
+   "name": "Seattle",
+   "state": "Washington",
+   "cities": [
+    "Seattle",
+    "Tacoma",
+    "Auburn",
+    "Kent"
+   ],
+   "shows": 140
+  },
+  {
+   "name": "New York",
+   "state": "New York",
+   "cities": [
+    "New York"
+   ],
+   "shows": 12
+  },
+  {
+   "name": "Chicago",
+   "state": "Illinois",
+   "cities": [
+    "Chicago"
+   ],
+   "shows": 12
+  },
+  {
+   "name": "New Orleans",
+   "state": "Louisiana",
+   "cities": [
+    "New Orleans"
+   ],
+   "shows": 6
+  },
+  {
+   "name": "San Francisco",
+   "state": "California",
+   "cities": [
+    "San Francisco"
+   ],
+   "shows": 5
+  },
+  {
+   "name": "Savannah",
+   "state": "Georgia",
+   "cities": [
+    "Savannah"
+   ],
+   "shows": 5
+  },
+  {
+   "name": "South Lake Tahoe",
+   "state": "California",
+   "cities": [
+    "South Lake Tahoe"
+   ],
+   "shows": 4
+  },
+  {
+   "name": "Charleston",
+   "state": "South Carolina",
+   "cities": [
+    "Charleston"
+   ],
+   "shows": 4
+  }
+ ],
+ "geo": {
+  "Anaheim": [
+   33.8095868,
+   -117.9229975
+  ],
+  "Auburn": [
+   47.307908,
+   -122.22806
+  ],
+  "Charleston": [
+   32.82222,
+   -79.95141
+  ],
+  "Chicago": [
+   41.88537,
+   -87.627457
+  ],
+  "Denver": [
+   39.7443428,
+   -104.9907298
+  ],
+  "Kent": [
+   47.390701,
+   -122.262604
+  ],
+  "New Orleans": [
+   29.944052,
+   -90.065674
+  ],
+  "New York": [
+   40.7637043,
+   -73.9975386
+  ],
+  "San Francisco": [
+   37.779499,
+   -122.419502
+  ],
+  "Savannah": [
+   32.0784855,
+   -81.0977944
+  ],
+  "Seattle": [
+   47.670502,
+   -122.381798
+  ],
+  "South Lake Tahoe": [
+   38.8829,
+   -120.034401
+  ],
+  "Tacoma": [
+   47.23634,
+   -122.426834
+  ]
+ },
+ "months": {
+  "2026-11": 470,
+  "2026-12": 1752,
+  "2027-01": 936,
+  "2027-02": 788,
+  "2027-03": 699,
+  "2027-04": 578,
+  "2027-05": 386,
+  "2027-06": 157,
+  "2027-07": 69,
+  "2027-08": 56,
+  "2027-09": 40,
+  "2027-10": 38,
+  "2027-11": 22
+ },
+ "count": 5991
+}
